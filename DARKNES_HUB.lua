@@ -1,5 +1,6 @@
---[[ DARKNES HUB - MAIN LOADER (Fixed Priority) ]]
+--[[ DARKNES HUB - MAIN LOADER ]]
 local baseUrl = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
+local bypass = "?t=" .. os.time() -- Bypass cache
 
 local success, gameName = pcall(function()
     return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
@@ -10,27 +11,39 @@ local lowerName = gameName:lower()
 
 local function loadScript(file)
     pcall(function()
-        loadstring(game:HttpGet(baseUrl .. file))()
+        loadstring(game:HttpGet(baseUrl .. file .. bypass))()
     end)
 end
 
--- PRIORITAS 1: MAP OPAH (Karena biasanya ada kata "Malam" atau "Opah")
+-- ==========================================
+-- DETEKSI OTOMATIS BERDASARKAN NAMA GAME
+-- ==========================================
+
+-- 1. Malam Bersama Opah
 if lowerName:find("opah") or lowerName:find("malam") then
     loadScript("darknesopah.lua")
 
--- PRIORITAS 2: MAP GRANNY (Baru cek "nenek" atau "granny" kalau bukan Opah)
-elseif lowerName:find("granny") or lowerName:find("nenek") or lowerName:find("rumah") then
-    loadScript("darknesgrannymp.lua")
+-- 2. Brookhaven RP
+elseif lowerName:find("brookhaven") or lowerName:find("brook") then
+    loadScript("darknesbrookhaven.lua")
 
--- PRIORITAS 3: MAP EVADE
+-- 3. Murder Mystery 2 (MM2)
+elseif lowerName:find("murder") or lowerName:find("mm2") then
+    loadScript("darknesmm2.lua")
+
+-- 4. Evade (Lari dari Nextbot)
 elseif lowerName:find("evade") then
     loadScript("darknesevade.lua")
 
--- JIKA TIDAK ADA YANG COCOK
+-- 5. Climb and Jump (Menara Dubai)
+elseif lowerName:find("climb") or lowerName:find("jump") or lowerName:find("dubai") then
+    loadScript("darknesclimbjump.lua")
+
+-- JIKA GAME TIDAK ADA DI LIST
 else
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "DARKNES HUB",
-        Text = "Map tidak didukung: " .. gameName,
+        Text = "Game belum didukung: " .. gameName,
         Duration = 3
     })
 end
