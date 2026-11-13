@@ -1,22 +1,15 @@
-local req = (syn and syn.request) or (http and http.request) or http_request or request
 local url = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
-local bypass = "?update=" .. tostring(tick())
+local bypass = "?v=" .. tostring(tick())
 
-local function getGame()
-    local s, n = pcall(function() return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name end)
-    return s and n or "Unknown"
-end
-
-local GameName = string.lower(getGame())
+local GameName = string.lower(game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name)
 local PlaceId = game.PlaceId
 
 local function Load(scr)
-    pcall(function()
-        loadstring(game:HttpGet(url .. scr .. bypass))()
-    end)
+    -- Sengaja tanpa pcall biar error-nya kelihatan di Console (F9)
+    loadstring(game:HttpGet(url .. scr .. bypass))()
 end
 
-if PlaceId == 750114916 or GameName:find("opah") or GameName:find("malam") then
+if PlaceId == 750114916 or GameName:find("opah") or GameName:find("malam") or GameName:find("nenek") or GameName:find("rumah") then
     Load("darknesopah.lua")
 elseif GameName:find("brookhaven") then
     Load("darknesbrookhaven.lua")
@@ -24,6 +17,9 @@ elseif GameName:find("evade") then
     Load("darknesevade.lua")
 else
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "DARKNES", Text = "Unsupported Game.", Duration = 3
+        Title = "DARKNES HUB", 
+        Text = "Game tidak dikenali (" .. GameName .. "). Memaksa load Opah...", 
+        Duration = 5
     })
+    Load("darknesopah.lua")
 end
