@@ -1,4 +1,4 @@
---[[ DARKNES HUB - MAIN LOADER ]]
+--[[ DARKNES HUB - MAIN LOADER (Fixed Priority) ]]
 local baseUrl = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
 
 local success, gameName = pcall(function()
@@ -14,12 +14,19 @@ local function loadScript(file)
     end)
 end
 
-if lowerName:find("granny") or lowerName:find("nenek") or lowerName:find("rumah") then
-    loadScript("darknesgrannymp.lua")
-elseif lowerName:find("opah") or lowerName:find("malam") then
+-- PRIORITAS 1: MAP OPAH (Karena biasanya ada kata "Malam" atau "Opah")
+if lowerName:find("opah") or lowerName:find("malam") then
     loadScript("darknesopah.lua")
+
+-- PRIORITAS 2: MAP GRANNY (Baru cek "nenek" atau "granny" kalau bukan Opah)
+elseif lowerName:find("granny") or lowerName:find("nenek") or lowerName:find("rumah") then
+    loadScript("darknesgrannymp.lua")
+
+-- PRIORITAS 3: MAP EVADE
 elseif lowerName:find("evade") then
     loadScript("darknesevade.lua")
+
+-- JIKA TIDAK ADA YANG COCOK
 else
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "DARKNES HUB",
