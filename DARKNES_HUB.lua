@@ -1,39 +1,29 @@
---[[ DARKNES HUB - MAIN LOADER ]]
-local baseUrl = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
-local bypass = "?t=" + os.time()
+local req = (syn and syn.request) or (http and http.request) or http_request or request
+local url = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
+local bypass = "?update=" .. tostring(tick())
 
-local success, gameName = pcall(function()
-    return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
-end)
-
-if not success or not gameName then gameName = "Unknown" end
-local lowerName = gameName:lower()
-local placeId = game.PlaceId
-
-local function loadScript(file)
-    local s, err = pcall(function()
-        loadstring(game:HttpGet(baseUrl .. file .. "?t=" .. os.time()))()
-    end)
-    if not s then
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "DARKNES HUB",
-            Text = "Gagal memuat " .. file .. ": " .. tostring(err),
-            Duration = 5
-        })
-    end
+local function getGame()
+    local s, n = pcall(function() return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name end)
+    return s and n or "Unknown"
 end
 
--- DETEKSI MAP
-if placeId == 750114916 or lowerName:find("opah") or lowerName:find("malam") or lowerName:find("rumah") then
-    loadScript("darknesopah.lua")
-elseif lowerName:find("brookhaven") or lowerName:find("brook") then
-    loadScript("darknesbrookhaven.lua")
-elseif lowerName:find("evade") then
-    loadScript("darknesevade.lua")
+local GameName = string.lower(getGame())
+local PlaceId = game.PlaceId
+
+local function Load(scr)
+    pcall(function()
+        loadstring(game:HttpGet(url .. scr .. bypass))()
+    end)
+end
+
+if PlaceId == 750114916 or GameName:find("opah") or GameName:find("malam") then
+    Load("darknesopah.lua")
+elseif GameName:find("brookhaven") then
+    Load("darknesbrookhaven.lua")
+elseif GameName:find("evade") then
+    Load("darknesevade.lua")
 else
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "DARKNES HUB",
-        Text = "Game belum didukung: " .. gameName,
-        Duration = 3
+        Title = "DARKNES", Text = "Unsupported Game.", Duration = 3
     })
 end
