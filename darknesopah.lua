@@ -1,4 +1,4 @@
---[[ DARKNES HUB - Malam Bersama Opah (Exclusive Edition) ]]
+--[[ DARKNES HUB - Opah Universe (Malam Bersama Opah & Rumah Opah) ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -19,14 +19,30 @@ local function char()
     return c, c and c:FindFirstChildOfClass("Humanoid") 
 end
 
-local function findByName(keyword, class) 
+-- Fungsi pencarian multi-keyword (Support Rumah Opah & Malam Bersama Opah)
+local function findByName(keywords, class) 
     local list = {} 
+    local keywordTable = type(keywords) == "table" and keywords or {keywords}
     for _, obj in ipairs(Workspace:GetDescendants()) do 
-        if obj:IsA(class or "BasePart") and obj.Name:lower():find(keyword:lower()) then 
-            table.insert(list, obj) 
-        end 
+        local isValidClass = (class and obj:IsA(class)) or (not class and (obj:IsA("BasePart") or obj:IsA("Model")))
+        if isValidClass then
+            local objName = obj.Name:lower()
+            for _, kw in ipairs(keywordTable) do
+                if objName:find(kw:lower()) then 
+                    table.insert(list, obj) 
+                    break 
+                end
+            end
+        end
     end 
     return list 
+end
+
+-- Fungsi cari Nenek / Opah
+local function getNenek()
+    local n = findByName({"nenek", "opah", "grandma"}, "Model") 
+    if #n == 0 then n = findByName({"nenek", "opah"}, nil) end
+    return n[1]
 end
 
 local function tpTo(cf, offsetY) 
@@ -38,25 +54,23 @@ end
 
 local Window = Rayfield:CreateWindow({ 
     Name = "☠ DARKNES HUB - OPAH ☠", 
-    LoadingTitle = "Memuat Opah...", 
+    LoadingTitle = "Memuat Opah Universe...", 
     ConfigurationSaving = {Enabled = false}, 
     KeySystem = false 
 })
 
 -- ===== TAB PLAYER =====
 local MainTab = Window:CreateTab("Player", 4483362458)
-MainTab:CreateSlider({Name = "WalkSpeed (Bypass)", Range = {16, 300}, Increment = 1, Suffix = "Speed", CurrentValue = 16, Callback = function(v) CFG.walkSpeed = v end})
-MainTab:CreateSlider({Name = "JumpPower", Range = {50, 300}, Increment = 1, Suffix = "JP", CurrentValue = 50, Callback = function(v) CFG.jumpPower = v end})
+MainTab:CreateSlider({Name = "WalkSpeed (Bypass)", Range = {16, 300}, Increment = 1, CurrentValue = 16, Callback = function(v) CFG.walkSpeed = v end})
+MainTab:CreateSlider({Name = "JumpPower", Range = {50, 300}, Increment = 1, CurrentValue = 50, Callback = function(v) CFG.jumpPower = v end})
 MainTab:CreateToggle({Name = "Noclip", CurrentValue = false, Callback = function(s) CFG.noclip = s end})
 
 MainTab:CreateToggle({
     Name = "Fly (WASD + Space)", CurrentValue = false, 
     Callback = function(state)
         CFG.flyEnabled = state
-        local c = char() 
-        if not c then return end
-        local root = c:FindFirstChild("HumanoidRootPart") 
-        if not root then return end
+        local c = char() if not c then return end
+        local root = c:FindFirstChild("HumanoidRootPart") if not root then return end
         if state then
             local bv = Instance.new("BodyVelocity", root) bv.Name = "FlyBody" bv.MaxForce = Vector3.new(1e5, 1e5, 1e5) bv.Velocity = Vector3.zero
             local bg = Instance.new("BodyGyro", root) bg.Name = "FlyGyro" bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5) bg.P = 1000 bg.D = 50
@@ -69,9 +83,7 @@ MainTab:CreateToggle({
                     if UserInput:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
                     if UserInput:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.new(0,1,0) end
                     if UserInput:IsKeyDown(Enum.KeyCode.LeftShift) then dir -= Vector3.new(0,1,0) end
-                    bv.Velocity = dir * CFG.flySpeed
-                    bg.CFrame = cam.CFrame
-                    task.wait()
+                    bv.Velocity = dir * CFG.flySpeed bg.CFrame = cam.CFrame task.wait()
                 end
                 if root:FindFirstChild("FlyBody") then root.FlyBody:Destroy() end
                 if root:FindFirstChild("FlyGyro") then root.FlyGyro:Destroy() end
@@ -95,37 +107,23 @@ end)
 -- ===== TAB TELEPORT =====
 local TpTab = Window:CreateTab("Teleport", 4483362458)
 TpTab:CreateSection("Lokasi Penting")
-TpTab:CreateButton({Name = "TP ke Nenek", Callback = function() local n = findByName("nenek") if n[1] then tpTo(n[1].CFrame) end end})
-TpTab:CreateButton({Name = "TP ke Dapur (Fixed)", Callback = function() local d = findByName("kitchen") if #d == 0 then d = findByName("dapur") end if d[1] then tpTo(d[1].CFrame, -3) end end})
-TpTab:CreateButton({Name = "TP ke Safe Zone", Callback = function() local s = findByName("safe") if #s == 0 then s = findByName("spawn") end if s[1] then tpTo(s[1].CFrame) end end})
-TpTab:CreateButton({Name = "TP ke Pintu Keluar", Callback = function() local e = findByName("exit") if #e == 0 then e = findByName("door") end if e[1] then tpTo(e[1].CFrame) end end})
+TpTab:CreateButton({Name = "TP ke Nenek / Opah", Callback = function() local n = getNenek() if n and n:FindFirstChild("HumanoidRootPart") then tpTo(n.HumanoidRootPart.CFrame) end end})
+TpTab:CreateButton({Name = "TP ke Dapur (Fixed)", Callback = function() local d = findByName({"kitchen", "dapur"}) if d[1] then tpTo(d[1].CFrame, -3) end end})
+TpTab:CreateButton({Name = "TP ke Safe Zone / Spawn", Callback = function() local s = findByName({"safe", "spawn"}) if s[1] then tpTo(s[1].CFrame) end end})
+TpTab:CreateButton({Name = "TP ke Pintu Keluar", Callback = function() local e = findByName({"exit", "door", "pintu"}) if e[1] then tpTo(e[1].CFrame) end end})
 
 -- ===== TAB VISUAL =====
 local VisTab = Window:CreateTab("Visual (ESP)", 4483362458)
 VisTab:CreateSection("Tampilan & Cahaya")
 
-VisTab:CreateToggle({
-    Name = "Fullbright", CurrentValue = false, 
-    Callback = function(s)
-        if s then
-            game:GetService("Lighting").Brightness = 3
-            game:GetService("Lighting").ClockTime = 12
-            for _, v in pairs(game:GetService("Lighting"):GetChildren()) do
-                if v:IsA("PostEffect") then v.Enabled = false end
-            end
-        else
-            game:GetService("Lighting").Brightness = 1
-            game:GetService("Lighting").ClockTime = 0
-        end
-    end
-})
-
-VisTab:CreateToggle({
-    Name = "No Fog (Hilangkan Kabut)", CurrentValue = false, 
-    Callback = function(s)
-        if s then game:GetService("Lighting").FogEnd = 999999 else game:GetService("Lighting").FogEnd = 100 end
-    end
-})
+VisTab:CreateToggle({Name = "Fullbright", CurrentValue = false, Callback = function(s)
+    local L = game:GetService("Lighting")
+    if s then L.Brightness = 3 L.ClockTime = 12 for _, v in pairs(L:GetChildren()) do if v:IsA("PostEffect") then v.Enabled = false end end
+    else L.Brightness = 1 L.ClockTime = 0 end
+end})
+VisTab:CreateToggle({Name = "No Fog (Hilangkan Kabut)", CurrentValue = false, Callback = function(s)
+    game:GetService("Lighting").FogEnd = s and 999999 or 100
+end})
 
 VisTab:CreateSection("ESP Settings")
 local function addESP(obj, color, name)
@@ -135,22 +133,23 @@ local function addESP(obj, color, name)
     local lbl = Instance.new("TextLabel", bill) lbl.Size = UDim2.new(1, 0, 1, 0) lbl.BackgroundTransparency = 1 lbl.Text = name or obj.Name lbl.TextColor3 = color lbl.TextStrokeTransparency = 0 lbl.Font = Enum.Font.GothamBold lbl.TextSize = 12
 end
 
-VisTab:CreateToggle({Name = "ESP Kunci (Kuning)", CurrentValue = false, Callback = function(s)
-    if s then local list = findByName("key") if #list == 0 then list = findByName("kunci") end for _, k in ipairs(list) do addESP(k, Color3.fromRGB(255, 215, 0), "Kunci") end end
+VisTab:CreateToggle({Name = "ESP Kunci", CurrentValue = false, Callback = function(s)
+    if s then local list = findByName({"key", "kunci"}) for _, k in ipairs(list) do addESP(k, Color3.fromRGB(255, 215, 0), "Kunci") end end
 end})
-VisTab:CreateToggle({Name = "ESP Code (Biru)", CurrentValue = false, Callback = function(s)
-    if s then local list = findByName("code") if #list == 0 then list = findByName("kode") end for _, c in ipairs(list) do addESP(c, Color3.fromRGB(0, 200, 255), "Code") end end
+VisTab:CreateToggle({Name = "ESP Code", CurrentValue = false, Callback = function(s)
+    if s then local list = findByName({"code", "kode"}) for _, c in ipairs(list) do addESP(c, Color3.fromRGB(0, 200, 255), "Code") end end
 end})
-VisTab:CreateToggle({Name = "ESP Nenek (Merah)", CurrentValue = false, Callback = function(s)
-    if s then local list = findByName("nenek") if #list == 0 then list = findByName("grandma") end for _, n in ipairs(list) do addESP(n, Color3.fromRGB(255, 0, 0), "Nenek") end end
+VisTab:CreateToggle({Name = "ESP Nenek/Opah", CurrentValue = false, Callback = function(s)
+    if s then local list = findByName({"nenek", "opah", "grandma"}) for _, n in ipairs(list) do addESP(n, Color3.fromRGB(255, 0, 0), "Opah") end end
 end})
-VisTab:CreateToggle({Name = "ESP Sendal (Coklat)", CurrentValue = false, Callback = function(s)
-    if s then local list = findByName("sendal") if #list == 0 then list = findByName("flip") end for _, sl in ipairs(list) do addESP(sl, Color3.fromRGB(180, 100, 50), "Sendal") end end
+VisTab:CreateToggle({Name = "ESP Sendal", CurrentValue = false, Callback = function(s)
+    if s then local list = findByName({"sendal", "flip", "sandal"}) for _, sl in ipairs(list) do addESP(sl, Color3.fromRGB(180, 100, 50), "Sendal") end end
 end})
 
 -- ===== TAB FARM =====
 local FarmTab = Window:CreateTab("Farm", 4483362458)
 FarmTab:CreateSection("Auto Collect")
+
 FarmTab:CreateToggle({Name = "Auto Collect Flip Flop", CurrentValue = false, Callback = function(s)
     CFG.autoFarmFlip = s
     task.spawn(function()
@@ -158,7 +157,7 @@ FarmTab:CreateToggle({Name = "Auto Collect Flip Flop", CurrentValue = false, Cal
             local c = char()
             if c and c:FindFirstChild("HumanoidRootPart") then
                 local startCF = c.HumanoidRootPart.CFrame
-                local flips = findByName("flip") if #flips == 0 then flips = findByName("sendal") end
+                local flips = findByName({"flip", "sendal", "sandal"})
                 for _, f in ipairs(flips) do if not CFG.autoFarmFlip then break end c.HumanoidRootPart.CFrame = f.CFrame task.wait(0.05) end
                 task.wait(0.2) c.HumanoidRootPart.CFrame = startCF
             end
@@ -166,15 +165,16 @@ FarmTab:CreateToggle({Name = "Auto Collect Flip Flop", CurrentValue = false, Cal
         end
     end)
 end})
+
 FarmTab:CreateToggle({Name = "Auto Farm Kunci + Gembok", CurrentValue = false, Callback = function(s)
     CFG.autoFarmKunci = s
     task.spawn(function()
         while CFG.autoFarmKunci do
             local c = char()
             if c and c:FindFirstChild("HumanoidRootPart") then
-                local keys = findByName("key") if #keys == 0 then keys = findByName("kunci") end
+                local keys = findByName({"key", "kunci"})
                 for _, k in ipairs(keys) do if not CFG.autoFarmKunci then break end c.HumanoidRootPart.CFrame = k.CFrame task.wait(0.1) end
-                local locks = findByName("gembok") if #locks == 0 then locks = findByName("lock") end
+                local locks = findByName({"gembok", "lock"})
                 for _, l in ipairs(locks) do if not CFG.autoFarmKunci then break end c.HumanoidRootPart.CFrame = l.CFrame task.wait(0.1) l:FireTouchInterest(c.HumanoidRootPart, l, 0) task.wait(0.05) l:FireTouchInterest(c.HumanoidRootPart, l, 1) end
             end
             task.wait(0.5)
@@ -188,54 +188,46 @@ ExTab:CreateSection("Fitur Spesial")
 
 ExTab:CreateToggle({Name = "Fling Player (Terbang jika tersentuh)", CurrentValue = false, Callback = function(s)
     CFG.flingPlayer = s
-    if s then
-        task.spawn(function()
-            while CFG.flingPlayer do
-                local c = char()
-                if c and c:FindFirstChild("HumanoidRootPart") then
-                    for _, p in ipairs(Players:GetPlayers()) do
-                        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                            local dist = (p.Character.HumanoidRootPart.Position - c.HumanoidRootPart.Position).Magnitude
-                            if dist < 5 then
-                                local bv = Instance.new("BodyVelocity", p.Character.HumanoidRootPart)
-                                bv.Velocity = Vector3.new(math.random(-500,500), 500, math.random(-500,500))
-                                bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                                game:GetService("Debris"):AddItem(bv, 0.5)
-                            end
+    task.spawn(function()
+        while CFG.flingPlayer do
+            local c = char()
+            if c and c:FindFirstChild("HumanoidRootPart") then
+                for _, p in ipairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        if (p.Character.HumanoidRootPart.Position - c.HumanoidRootPart.Position).Magnitude < 5 then
+                            local bv = Instance.new("BodyVelocity", p.Character.HumanoidRootPart)
+                            bv.Velocity = Vector3.new(math.random(-500,500), 500, math.random(-500,500))
+                            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                            game:GetService("Debris"):AddItem(bv, 0.5)
                         end
                     end
                 end
-                task.wait(0.1)
             end
-        end)
-    end
+            task.wait(0.1)
+        end
+    end)
 end})
 
 ExTab:CreateToggle({Name = "Auto Run (Kabur saat dilihat Nenek)", CurrentValue = false, Callback = function(s)
     CFG.autoRun = s
-    if s then
-        task.spawn(function()
-            while CFG.autoRun do
-                local c = char()
-                if c and c:FindFirstChild("HumanoidRootPart") then
-                    local nenek = findByName("nenek") if #nenek == 0 then nenek = findByName("opah") end
-                    if nenek[1] and nenek[1]:FindFirstChild("HumanoidRootPart") then
-                        local dist = (nenek[1].HumanoidRootPart.Position - c.HumanoidRootPart.Position).Magnitude
-                        if dist < 35 then
-                            local startCF = c.HumanoidRootPart.CFrame
-                            local safe = findByName("safe") if #safe == 0 then safe = findByName("spawn") end
-                            if safe[1] then
-                                c.HumanoidRootPart.CFrame = safe[1].CFrame + Vector3.new(0,5,0)
-                                task.wait(2)
-                                c.HumanoidRootPart.CFrame = startCF
-                            end
-                        end
+    task.spawn(function()
+        while CFG.autoRun do
+            local c = char()
+            local n = getNenek()
+            if c and n and n:FindFirstChild("HumanoidRootPart") then
+                if (n.HumanoidRootPart.Position - c.HumanoidRootPart.Position).Magnitude < 35 then
+                    local startCF = c.HumanoidRootPart.CFrame
+                    local safe = findByName({"safe", "spawn"})
+                    if safe[1] then
+                        c.HumanoidRootPart.CFrame = safe[1].CFrame + Vector3.new(0,5,0)
+                        task.wait(3)
+                        c.HumanoidRootPart.CFrame = startCF
                     end
                 end
-                task.wait(0.5)
             end
-        end)
-    end
+            task.wait(0.5)
+        end
+    end)
 end})
 
 ExTab:CreateToggle({Name = "Unlimited Stamina", CurrentValue = false, Callback = function(s)
@@ -254,17 +246,16 @@ end})
 ExTab:CreateToggle({Name = "No Hide (Lemari tidak bisa dibuka)", CurrentValue = false, Callback = function(s)
     CFG.noHide = s
     if s then
-        local hides = findByName("hide") local lemari = findByName("lemari")
+        local hides = findByName({"hide", "lemari"})
         for _, obj in ipairs(hides) do for _, desc in ipairs(obj:GetDescendants()) do if desc:IsA("ProximityPrompt") then desc.Enabled = false end end end
-        for _, obj in ipairs(lemari) do for _, desc in ipairs(obj:GetDescendants()) do if desc:IsA("ProximityPrompt") then desc.Enabled = false end end end
     end
 end})
 
-ExTab:CreateToggle({Name = "Freeze Opah (Nenek membeku)", CurrentValue = false, Callback = function(s)
+ExTab:CreateToggle({Name = "Freeze Opah / Nenek", CurrentValue = false, Callback = function(s)
     CFG.freezeOpah = s
-    local nenek = findByName("nenek") if #nenek == 0 then nenek = findByName("opah") end
-    for _, v in ipairs(nenek) do
-        local hum = v:FindFirstChildOfClass("Humanoid") local hrp = v:FindFirstChild("HumanoidRootPart")
+    local n = getNenek()
+    if n then
+        local hum = n:FindFirstChildOfClass("Humanoid") local hrp = n:FindFirstChild("HumanoidRootPart")
         if hum and hrp then
             hum.WalkSpeed = s and 0 or 16 hum.JumpPower = s and 0 or 50
             hrp.Anchored = s
@@ -298,14 +289,12 @@ end})
 RunService.RenderStepped:Connect(function()
     if CFG.warningSign then
         local c = char()
-        if c and c:FindFirstChild("HumanoidRootPart") then
-            local nenek = findByName("nenek") if #nenek == 0 then nenek = findByName("opah") end
-            if nenek[1] and nenek[1]:FindFirstChild("HumanoidRootPart") then
-                local dist = (nenek[1].HumanoidRootPart.Position - c.HumanoidRootPart.Position).Magnitude
-                if dist > 100 then warningText.TextColor3 = Color3.fromRGB(255, 255, 255)
-                elseif dist > 40 then warningText.TextColor3 = Color3.fromRGB(255, 255, 0)
-                else warningText.TextColor3 = Color3.fromRGB(255, 0, 0) end
-            end
+        local n = getNenek()
+        if c and n and n:FindFirstChild("HumanoidRootPart") then
+            local dist = (n.HumanoidRootPart.Position - c.HumanoidRootPart.Position).Magnitude
+            if dist > 100 then warningText.TextColor3 = Color3.fromRGB(255, 255, 255)
+            elseif dist > 40 then warningText.TextColor3 = Color3.fromRGB(255, 255, 0)
+            else warningText.TextColor3 = Color3.fromRGB(255, 0, 0) end
         end
     end
 end)
