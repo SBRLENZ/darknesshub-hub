@@ -1,6 +1,6 @@
 --[[ DARKNES HUB - MAIN LOADER ]]
 local baseUrl = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
-local bypass = "?t=" .. os.time()
+local bypass = "?t=" + os.time()
 
 local success, gameName = pcall(function()
     return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
@@ -12,7 +12,7 @@ local placeId = game.PlaceId
 
 local function loadScript(file)
     local s, err = pcall(function()
-        loadstring(game:HttpGet(baseUrl .. file .. bypass))()
+        loadstring(game:HttpGet(baseUrl .. file .. "?t=" .. os.time()))()
     end)
     if not s then
         game:GetService("StarterGui"):SetCore("SendNotification", {
