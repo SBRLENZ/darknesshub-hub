@@ -3,44 +3,55 @@ local Plrs = game:GetService("Players")
 local RS = game:GetService("RunService")
 local WS = game:GetService("Workspace")
 local Lgt = game:GetService("Lighting")
-local UIS = game:GetService("UserInputService")
 local LP = Plrs.LocalPlayer
 
 local Win = Lib:CreateWindow({
-   Name = "DARKNES HUB | Animal Hospital OP",
+   Name = "DARKNES HUB | Animal Hospital (ID/EN)",
    LoadingTitle = "DARKNES HUB ULTIMATE",
    LoadingSubtitle = "SBRLENZ",
-   ConfigurationSaving = { Enabled = true, FolderName = "DarknesCfg", FileName = "AnimalHospitalOP" },
+   ConfigurationSaving = { Enabled = true, FolderName = "DarknesCfg", FileName = "AnimalHospitalDual" },
    KeySystem = false
 })
 
 local function root() return LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") end
 local function hum() return LP.Character and LP.Character:FindFirstChildOfClass("Humanoid") end
-local function go(cf)
-    local r = root()
-    if r and cf then r.CFrame = typeof(cf) == "CFrame" and cf + Vector3.new(0, 3, 0) or CFrame.new(cf + Vector3.new(0, 3, 0)) end
+
+-- Helper pencocokan kata kunci Indo & Inggris
+local function match(str, list)
+    if not str then return false end
+    local low = str:lower()
+    for _, k in ipairs(list) do
+        if low:find(k) then return true end
+    end
+    return false
 end
 
--- ==========================================
--- TAB 1: VISUAL & ESP ANOMALI
--- ==========================================
-local t1 = Win:CreateTab("Visual ESP", 4483362458)
-local espAnomaly, espPet, espItem, espPlr, fbOn = false, false, false, false
+local kwAnomali = {"anomaly", "anomali", "glitch", "lilin", "candle", "monster", "ghost", "hantu", "rare", "boss"}
+local kwPasien  = {"patient", "pasien", "animal", "hewan", "pet", "kucing", "anjing", "cat", "dog"}
+local kwObat    = {"med", "obat", "cure", "sembuh", "potion", "syringe", "suntik", "darah", "blood", "vitamin"}
+local kwDaftar  = {"register", "daftar", "reception", "resepsionis", "antri", "queue", "check in"}
+local kwPeriksa = {"treat", "obati", "examine", "periksa", "heal", "operasi", "surgery", "bedah"}
+local kwBeli    = {"buy", "beli", "purchase", "shop", "toko", "store"}
+local kwKopi    = {"coffee", "kopi", "brew", "seduh", "espresso"}
+local kwDokter  = {"doctor", "dokter", "timer", "waktu", "shift", "arrival", "datang"}
 
-t1:CreateToggle({ Name = "ESP Anomali / Glitch / Rare Patient", CurrentValue = false, Callback = function(v)
-    espAnomaly = v
+-- ==========================================
+-- TAB 1: VISUAL (ESP & TIME DOCTOR)
+-- ==========================================
+local t1 = Win:CreateTab("Visual", 4483362458)
+local espAnom, espPat, espPlr = false, false, false
+
+t1:CreateToggle({ Name = "ESP Anomali (Red)", CurrentValue = false, Callback = function(v)
+    espAnom = v
     task.spawn(function()
-        while espAnomaly do
+        while espAnom do
             for _, o in ipairs(WS:GetDescendants()) do
-                if o:IsA("Model") and not Plrs:GetPlayerFromCharacter(o) then
-                    local nameL = o.Name:lower()
-                    if nameL:find("anomaly") or nameL:find("glitch") or nameL:find("rare") or nameL:find("boss") or nameL:find("special") then
-                        if not o:FindFirstChild("_anomalyHL") then
-                            local h = Instance.new("Highlight", o)
-                            h.Name = "_anomalyHL"
-                            h.FillColor = Color3.fromRGB(255, 0, 255)
-                            h.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        end
+                if (o:IsA("Model") or o:IsA("BasePart")) and not Plrs:GetPlayerFromCharacter(o) then
+                    if match(o.Name, kwAnomali) and not o:FindFirstChild("_espAnom") then
+                        local h = Instance.new("Highlight", o)
+                        h.Name = "_espAnom"
+                        h.FillColor = Color3.fromRGB(255, 0, 0)
+                        h.OutlineColor = Color3.fromRGB(255, 255, 255)
                     end
                 end
             end
@@ -49,15 +60,15 @@ t1:CreateToggle({ Name = "ESP Anomali / Glitch / Rare Patient", CurrentValue = f
     end)
 end })
 
-t1:CreateToggle({ Name = "ESP Animals / Pets (Blue)", CurrentValue = false, Callback = function(v)
-    espPet = v
+t1:CreateToggle({ Name = "ESP Patient / Pasien (Blue)", CurrentValue = false, Callback = function(v)
+    espPat = v
     task.spawn(function()
-        while espPet do
+        while espPat do
             for _, o in ipairs(WS:GetDescendants()) do
-                if o:IsA("Model") and (o:FindFirstChildOfClass("Humanoid") or o.Name:lower():find("pet") or o.Name:lower():find("animal")) and not Plrs:GetPlayerFromCharacter(o) then
-                    if not o:FindFirstChild("_petHL") then
+                if o:IsA("Model") and not Plrs:GetPlayerFromCharacter(o) then
+                    if match(o.Name, kwPasien) and not o:FindFirstChild("_espPat") then
                         local h = Instance.new("Highlight", o)
-                        h.Name = "_petHL"
+                        h.Name = "_espPat"
                         h.FillColor = Color3.fromRGB(0, 150, 255)
                     end
                 end
@@ -67,14 +78,14 @@ t1:CreateToggle({ Name = "ESP Animals / Pets (Blue)", CurrentValue = false, Call
     end)
 end })
 
-t1:CreateToggle({ Name = "ESP Players (Green)", CurrentValue = false, Callback = function(v)
+t1:CreateToggle({ Name = "ESP Player (Green)", CurrentValue = false, Callback = function(v)
     espPlr = v
     task.spawn(function()
         while espPlr do
             for _, p in ipairs(Plrs:GetPlayers()) do
-                if p ~= LP and p.Character and not p.Character:FindFirstChild("_plrHL") then
+                if p ~= LP and p.Character and not p.Character:FindFirstChild("_espPlr") then
                     local h = Instance.new("Highlight", p.Character)
-                    h.Name = "_plrHL"
+                    h.Name = "_espPlr"
                     h.FillColor = Color3.fromRGB(0, 255, 0)
                 end
             end
@@ -83,77 +94,59 @@ t1:CreateToggle({ Name = "ESP Players (Green)", CurrentValue = false, Callback =
     end)
 end })
 
-t1:CreateToggle({ Name = "Fullbright Lighting", CurrentValue = false, Callback = function(v)
-    fbOn = v
+t1:CreateToggle({ Name = "Fullbright", CurrentValue = false, Callback = function(v)
     Lgt.Brightness = v and 3 or 1
     Lgt.GlobalShadows = not v
 end })
 
-t1:CreateParagraph({ Title = "Doctor Timer Status", Content = "Checking doctor arrival time automatically..." })
+local docPara = t1:CreateParagraph({ Title = "Time Doctor / Waktu Dokter", Content = "Scanning timer..." })
 task.spawn(function()
     while true do
+        local foundText = "Menunggu jadwal dokter / Waiting..."
         for _, obj in ipairs(WS:GetDescendants()) do
-            if obj.Name:lower():find("timer") or obj.Name:lower():find("doctor") then
-                break
+            if obj:IsA("TextLabel") and (match(obj.Name, kwDokter) or match(obj.Text, kwDokter)) then
+                if obj.Text ~= "" then
+                    foundText = obj.Text
+                    break
+                end
             end
         end
-        task.wait(3)
+        docPara:Set({ Title = "Time Doctor / Waktu Dokter", Content = foundText })
+        task.wait(2)
     end
 end)
 
 -- ==========================================
--- TAB 2: OP AUTO-FARM & HOSPITAL HACKS
+-- TAB 2: AUTO FARM (ID & EN SCANNER)
 -- ==========================================
-local t2 = Win:CreateTab("OP Auto-Farm", 4483362458)
-local autoReg, autoCheck, autoHealLoop, autoTpDirect = false, false, false, false
+local t2 = Win:CreateTab("Auto", 4483362458)
+local autoPatSeq, autoBuyFlag, autoTreatAll, autoKillAnom = false, false, false, false
+local selectedRoom = "Kamar 1 / Room 1"
 
-t2:CreateToggle({ Name = "Auto Daftarin Pasien (Queue)", CurrentValue = false, Callback = function(v)
-    autoReg = v
-    task.spawn(function()
-        while autoReg do
-            for _, o in ipairs(WS:GetDescendants()) do
-                if o:IsA("ProximityPrompt") and (o.ActionText:lower():find("register") or o.ActionText:lower():find("daftar") or o.ObjectText:lower():find("reception")) then
-                    fireproximityprompt(o)
-                end
-            end
-            task.wait(1)
-        end
-    end)
-end })
+t2:CreateDropdown({
+    Name = "Pilih Kamar / Select Room",
+    Options = {"Kamar 1 / Room 1", "Kamar 2 / Room 2", "Kamar 3 / Room 3", "Kamar 4 / Room 4", "Kamar 5 / Room 5", "Kamar 6 / Room 6", "Kamar 7 / Room 7", "Kamar 8 (Operasi/Surgery)"},
+    CurrentOption = "Kamar 1 / Room 1",
+    Callback = function(v) selectedRoom = v end
+})
 
-t2:CreateToggle({ Name = "Auto Periksa & Beri Obat (System Pick)", CurrentValue = false, Callback = function(v)
-    autoCheck = v
+t2:CreateToggle({ Name = "Auto Patient (Ambil Obat 1-1)", CurrentValue = false, Callback = function(v)
+    autoPatSeq = v
     task.spawn(function()
-        while autoCheck do
-            for _, o in ipairs(WS:GetDescendants()) do
-                if o:IsA("ProximityPrompt") and (o.ActionText:lower():find("treat") or o.ActionText:lower():find("cure") or o.ActionText:lower():find("examine") or o.ActionText:lower():find("medicine")) then
-                    fireproximityprompt(o)
-                end
-            end
-            task.wait(0.5)
-        end
-    end)
-end })
-
-t2:CreateToggle({ Name = "Auto Heal (TP to Patient & Return)", CurrentValue = false, Callback = function(v)
-    autoHealLoop = v
-    task.spawn(function()
-        while autoHealLoop do
+        while autoPatSeq do
             local r = root()
             if r then
-                local savedPos = r.CFrame
                 for _, obj in ipairs(WS:GetDescendants()) do
-                    if obj:IsA("Model") and (obj.Name:lower():find("patient") or obj.Name:lower():find("animal") or obj:FindFirstChildOfClass("Humanoid")) then
-                        local targetPart = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")
-                        if targetPart and not Plrs:GetPlayerFromCharacter(obj) then
-                            r.CFrame = targetPart.CFrame + Vector3.new(0, 3, 0)
-                            task.wait(0.2)
-                            for _, p in ipairs(obj:GetDescendants()) do
-                                if p:IsA("ProximityPrompt") then fireproximityprompt(p) end
+                    if not autoPatSeq then break end
+                    if (obj:IsA("Tool") or obj:IsA("Model") or obj:IsA("BasePart")) and match(obj.Name, kwObat) then
+                        local target = obj:IsA("Model") and (obj:FindFirstChild("Handle") or obj:FindFirstChildWhichIsA("BasePart")) or (obj:IsA("Tool") and obj:FindFirstChild("Handle") or obj)
+                        if target and target:IsA("BasePart") then
+                            r.CFrame = target.CFrame + Vector3.new(0, 2, 0)
+                            task.wait(0.35)
+                            for _, pr in ipairs(obj:GetDescendants()) do
+                                if pr:IsA("ProximityPrompt") and fireproximityprompt then fireproximityprompt(pr) end
                             end
-                            task.wait(0.3)
-                            r.CFrame = savedPos
-                            break
+                            task.wait(0.4)
                         end
                     end
                 end
@@ -163,92 +156,164 @@ t2:CreateToggle({ Name = "Auto Heal (TP to Patient & Return)", CurrentValue = fa
     end)
 end })
 
-t2:CreateToggle({ Name = "Auto Direct Give Item / Medicine", CurrentValue = false, Callback = function(v)
-    autoTpDirect = v
+t2:CreateToggle({ Name = "Auto Buy Item (Toko / Shop)", CurrentValue = false, Callback = function(v)
+    autoBuyFlag = v
     task.spawn(function()
-        while autoTpDirect do
+        while autoBuyFlag do
             local r = root()
             if r then
-                for _, tool in ipairs(WS:GetDescendants()) do
-                    if tool:IsA("Tool") and tool:FindFirstChild("Handle") then
-                        tool.Handle.CFrame = r.CFrame
+                for _, pr in ipairs(WS:GetDescendants()) do
+                    if not autoBuyFlag then break end
+                    if pr:IsA("ProximityPrompt") and (match(pr.ActionText, kwBeli) or match(pr.ObjectText, kwBeli)) then
+                        local part = pr.Parent:IsA("BasePart") and pr.Parent or pr.Parent:FindFirstChildWhichIsA("BasePart")
+                        if part then
+                            r.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+                            task.wait(0.3)
+                            if fireproximityprompt then fireproximityprompt(pr) end
+                            task.wait(0.5)
+                        end
                     end
                 end
             end
-            task.wait(0.5)
+            task.wait(2)
         end
     end)
 end })
 
-t2:CreateButton({ Name = "Instant Interact All Prompts", Callback = function()
-    for _, p in ipairs(WS:GetDescendants()) do if p:IsA("ProximityPrompt") then p.HoldDuration = 0 end end
+t2:CreateToggle({ Name = "Auto Obati Semua Pasien & Kamar 8", CurrentValue = false, Callback = function(v)
+    autoTreatAll = v
+    task.spawn(function()
+        while autoTreatAll do
+            local r = root()
+            if r then
+                for _, obj in ipairs(WS:GetDescendants()) do
+                    if not autoTreatAll then break end
+                    if obj:IsA("Model") and match(obj.Name, kwPasien) and not Plrs:GetPlayerFromCharacter(obj) then
+                        local part = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")
+                        if part then
+                            r.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+                            task.wait(0.35)
+                            for _, pr in ipairs(obj:GetDescendants()) do
+                                if pr:IsA("ProximityPrompt") and fireproximityprompt then fireproximityprompt(pr) end
+                            end
+                            task.wait(0.5)
+                        end
+                    end
+                end
+            end
+            task.wait(1.5)
+        end
+    end)
+end })
+
+t2:CreateToggle({ Name = "Auto Kill Anomali & Lilin (Candles)", CurrentValue = false, Callback = function(v)
+    autoKillAnom = v
+    task.spawn(function()
+        while autoKillAnom do
+            local r = root()
+            if r then
+                for _, obj in ipairs(WS:GetDescendants()) do
+                    if not autoKillAnom then break end
+                    if (obj:IsA("Model") or obj:IsA("BasePart")) and match(obj.Name, kwAnomali) and not Plrs:GetPlayerFromCharacter(obj) then
+                        local target = obj:IsA("Model") and (obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")) or obj
+                        if target and target:IsA("BasePart") then
+                            r.CFrame = target.CFrame + Vector3.new(0, 2, 0)
+                            task.wait(0.25)
+                            for _, pr in ipairs(obj:GetDescendants()) do
+                                if pr:IsA("ProximityPrompt") and fireproximityprompt then fireproximityprompt(pr) end
+                            end
+                            task.wait(0.3)
+                        end
+                    end
+                end
+            end
+            task.wait(1)
+        end
+    end)
 end })
 
 -- ==========================================
--- TAB 3: EXCLUSIVE (SAFE NOCLIP & COFFEE)
+-- TAB 3: EXCLUSIVE (SAFE NOCLIP, KOPI, DAFTAR)
 -- ==========================================
 local t3 = Win:CreateTab("Exclusive", 4483362458)
-local safeNoclip, autoCoffee = false, false
+local safeNoclip, autoCoffee, autoRegAll = false, false, false
 
-t3:CreateToggle({ Name = "Safe Noclip (Walls Only / No Floor Fall)", CurrentValue = false, Callback = function(v)
+t3:CreateButton({ Name = "Instant Interact (1x Pencet)", Callback = function()
+    for _, p in ipairs(WS:GetDescendants()) do if p:IsA("ProximityPrompt") then p.HoldDuration = 0 end end
+end })
+
+t3:CreateToggle({ Name = "Safe Noclip (Anti Tembus Lantai)", CurrentValue = false, Callback = function(v)
     safeNoclip = v
 end })
 
 RS.Stepped:Connect(function()
     if safeNoclip and LP.Character then
-        local r = root()
         for _, p in ipairs(LP.Character:GetDescendants()) do
-            if p:IsA("BasePart") then
-                -- Biarkan bagian kaki bawah tetap Colide agar tidak tembus lantai jatuh ke void
-                if p.Name ~= "HumanoidRootPart" and p.Name ~= "LeftFoot" and p.Name ~= "RightFoot" and p.Name ~= "LowerTorso" then
-                    p.CanCollide = false
-                end
+            if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" and p.Name ~= "LeftFoot" and p.Name ~= "RightFoot" and p.Name ~= "LowerTorso" then
+                p.CanCollide = false
             end
         end
     end
 end)
 
-t3:CreateToggle({ Name = "Auto Ambil Kopi (Teleport when ready)", CurrentValue = false, Callback = function(v)
+t3:CreateToggle({ Name = "Auto Ambil Kopi (TP Ready)", CurrentValue = false, Callback = function(v)
     autoCoffee = v
     task.spawn(function()
         while autoCoffee do
-            for _, obj in ipairs(WS:GetDescendants()) do
-                if obj.Name:lower():find("coffee") or obj.Name:lower():find("kopi") then
-                    local handle = obj:FindFirstChild("Handle") or obj:FindFirstChildWhichIsA("BasePart")
-                    local r = root()
-                    if handle and r then
-                        r.CFrame = handle.CFrame + Vector3.new(0, 3, 0)
-                        task.wait(0.3)
-                        for _, p in ipairs(obj:GetDescendants()) do
-                            if p:IsA("ProximityPrompt") then fireproximityprompt(p) end
+            local r = root()
+            if r then
+                for _, obj in ipairs(WS:GetDescendants()) do
+                    if match(obj.Name, kwKopi) then
+                        local target = obj:IsA("Model") and (obj:FindFirstChild("Handle") or obj:FindFirstChildWhichIsA("BasePart")) or (obj:IsA("BasePart") and obj)
+                        if target then
+                            r.CFrame = target.CFrame + Vector3.new(0, 3, 0)
+                            task.wait(0.3)
+                            for _, pr in ipairs(obj:GetDescendants()) do
+                                if pr:IsA("ProximityPrompt") and fireproximityprompt then fireproximityprompt(pr) end
+                            end
                         end
                     end
                 end
             end
-            task.wait(3)
+            task.wait(2.5)
         end
     end)
 end })
 
-t3:CreateButton({ Name = "Instant Skip Doctor Dialogue", Callback = function()
-    for _, gui in ipairs(LP.PlayerGui:GetDescendants()) do
-        if gui:IsA("TextButton") and (gui.Text:lower():find("skip") or gui.Text:lower():find("next")) then
-            for _, conn in ipairs(getconnections(gui.MouseButton1Click)) do
-                conn:Fire()
+t3:CreateToggle({ Name = "Instant Daftar Pasien & Respawn", CurrentValue = false, Callback = function(v)
+    autoRegAll = v
+    task.spawn(function()
+        while autoRegAll do
+            local r = root()
+            if r then
+                for _, pr in ipairs(WS:GetDescendants()) do
+                    if pr:IsA("ProximityPrompt") and (match(pr.ActionText, kwDaftar) or match(pr.ObjectText, kwDaftar)) then
+                        local part = pr.Parent:IsA("BasePart") and pr.Parent or pr.Parent:FindFirstChildWhichIsA("BasePart")
+                        if part then
+                            r.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+                            task.wait(0.25)
+                            if fireproximityprompt then fireproximityprompt(pr) end
+                            task.wait(0.3)
+                            local sp = WS:FindFirstChildWhichIsA("SpawnLocation", true)
+                            if sp then r.CFrame = sp.CFrame + Vector3.new(0, 3, 0) end
+                        end
+                    end
+                end
             end
+            task.wait(1.5)
         end
-    end
+    end)
 end })
 
 -- ==========================================
--- TAB 4: TELEPORT & UTILITY
+-- TAB 4: UTILITY & TELEGRAM
 -- ==========================================
 local t4 = Win:CreateTab("Utility", 4483362458)
 local sid, svol, snd = "6023426915", 1, nil
 
-t4:CreateInput({ Name = "Roblox Audio ID", PlaceholderText = "Sound ID", Callback = function(t) sid = t end })
-t4:CreateSlider({ Name = "Volume", Range = {0.1, 5}, Increment = 0.1, CurrentValue = 1, Callback = function(v) svol = v if snd then snd.Volume = v end end })
-t4:CreateToggle({ Name = "Play Sound", CurrentValue = false, Callback = function(s)
+t4:CreateInput({ Name = "Putar Lagu (Roblox Audio ID)", PlaceholderText = "Sound ID", Callback = function(t) sid = t end })
+t4:CreateSlider({ Name = "Volume Lagu", Range = {0.1, 5}, Increment = 0.1, CurrentValue = 1, Callback = function(v) svol = v if snd then snd.Volume = v end end })
+t4:CreateToggle({ Name = "Play / Stop Lagu", CurrentValue = false, Callback = function(s)
     if s then
         if snd then snd:Destroy() end
         local r = root()
@@ -264,19 +329,21 @@ t4:CreateToggle({ Name = "Play Sound", CurrentValue = false, Callback = function
     end
 end })
 
-t4:CreateButton({ Name = "Chat Owner via Telegram (Copy Link)", Callback = function()
+t4:CreateButton({ Name = "Chat Owner via Telegram (@ManzXDzx)", Callback = function()
     if setclipboard then
         setclipboard("https://t.me/ManzXDzx")
-        game:GetService("StarterGui"):SetCore("SendNotification", { Title = "DARKNES HUB", Text = "Telegram link copied to clipboard!", Duration = 5 })
+        game:GetService("StarterGui"):SetCore("SendNotification", { Title = "DARKNES HUB", Text = "Link Telegram disalin: https://t.me/ManzXDzx", Duration = 5 })
     end
 end })
 
-t4:CreateButton({ Name = "Activate Anti-AFK Protector", Callback = function()
-    LP.Idled:Connect(function()
-        game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), WS.CurrentCamera.CFrame)
-        task.wait(1)
-        game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0), WS.CurrentCamera.CFrame)
-    end)
+t4:CreateButton({ Name = "Auto Skip Dokter (Dialogue)", Callback = function()
+    for _, gui in ipairs(LP.PlayerGui:GetDescendants()) do
+        if gui:IsA("TextButton") and (gui.Text:lower():find("skip") or gui.Text:lower():find("lewati") or gui.Text:lower():find("next") or gui.Text:lower():find("lanjut")) then
+            if getconnections then
+                for _, conn in ipairs(getconnections(gui.MouseButton1Click)) do conn:Fire() end
+            end
+        end
+    end
 end })
 
 t4:CreateButton({ Name = "Unload UI Hub", Callback = function() Lib:Destroy() end })

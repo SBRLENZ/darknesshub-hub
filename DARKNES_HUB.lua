@@ -14,25 +14,20 @@ local function boot(scriptName)
     end
 end
 
--- Deteksi paksa berdasarkan PlaceId atau nama game/workspace khusus Animal Hospital
-local placeId = game.PlaceId
 local ok, info = pcall(function()
-    return game:GetService("MarketplaceService"):GetProductInfo(placeId).Name
+    return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 end)
 local gName = ok and info:lower() or ""
 
--- Debug print ke console F9
-print("DARKNES HUB DETECTED GAME:", gName, "PLACEID:", placeId)
-
+-- Scanner Dual Language (ID + EN) & Workspace Check
 if gName:find("rumah opa") or gName:find("opah") then
     boot("darknesopah.lua")
 elseif gName:find("evade") or gName:find("menghindar") or workspace:FindFirstChild("Nextbots") then
     boot("darknesevade.lua")
-elseif gName:find("animal") or gName:find("hospital") or workspace:FindFirstChild("Patient") or workspace:FindFirstChild("Patients") or workspace:FindFirstChild("PatientSpawn") then
+elseif gName:find("animal") or gName:find("hospital") or gName:find("hewan") or gName:find("rumah sakit") or workspace:FindFirstChild("Pasien") or workspace:FindFirstChild("Patient") or workspace:FindFirstChild("Patients") then
     boot("darknesanimalhospital.lua")
 elseif gName:find("brookhaven") or gName:find("brook") then
     boot("darknesbrookhaven.lua")
 else
-    -- Fallback default jika tidak terdeteksi
     boot("darknesanimalhospital.lua")
 end
