@@ -1,4 +1,4 @@
---[[ DARKNES HUB - MAIN LOADER (ID & WORKSPACE CHECK) ]]
+--[[ DARKNES HUB - MAIN LOADER ]]
 local baseUrl = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
 local bypass = "?t=" .. os.time()
 
@@ -15,29 +15,21 @@ local function loadScript(file)
     end
 end
 
--- Deteksi game berdasarkan PlaceId atau Workspace
-local placeId = game.PlaceId
-local isEvade = false
-local isOpah = false
-
--- Cek apakah ada objek khas Evade atau Rumah Opa di Workspace / PlaceId
-if workspace:FindFirstChild("Nextbots") or workspace:FindFirstChild("Map") or placeId == 9872472334 -- contoh/masukin ID Evade kalau tau, atau biarkan deteksi nama fleksibel
-then
-    isEvade = true
-end
-
--- Cek nama game via Marketplace dengan fallback aman
+-- Deteksi game secara fleksibel
 local success, gameName = pcall(function()
-    return game:GetService("MarketplaceService"):GetProductInfo(placeId).Name
+    return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 end)
 
 local lowerName = success and gameName:lower() or ""
 
+-- ROUTER MODUL GAME
 if lowerName:find("rumah opa") or lowerName:find("opah") then
     loadScript("darknesopah.lua")
 elseif lowerName:find("evade") or lowerName:find("menghindar") or lowerName:find("hlwn") or workspace:FindFirstChild("Nextbots") then
     loadScript("darknesevade.lua")
+elseif lowerName:find("brookhaven") or lowerName:find("brook") then
+    loadScript("darknesbrookhaven.lua")
 else
-    -- Paksa masuk Evade kalau lu lagi main mode Menghindar/Evade tapi namanya nggak kebaca
-    loadScript("darknesevade.lua")
+    -- Fallback aman jika judul game tidak terbaca sempurna
+    loadScript("darknesbrookhaven.lua")
 end
