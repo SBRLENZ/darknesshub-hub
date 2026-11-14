@@ -44,7 +44,7 @@ FloatText.Font = Enum.Font.GothamBold
 FloatText.Text = "D"
 FloatText.Parent = FloatBtn
 
--- 2. Kotak Besar Utama (Layout ala Rayfield: Sidebar Kiri, Konten Kanan)
+-- 2. Kotak Besar Utama (Layout ala Vexus/Rayfield: Sidebar Kiri, Konten Kanan)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainWindow"
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
@@ -74,13 +74,13 @@ TopBar.BackgroundTransparency = 1
 TopBar.Parent = MainFrame
 
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(0, 350, 1, 0)
+TitleLabel.Size = UDim2.new(0, 380, 1, 0)
 TitleLabel.Position = UDim2.new(0, 15, 0, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.TextColor3 = Color3.fromRGB(240, 245, 255)
 TitleLabel.TextSize = 14
 TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.Text = "DARKNES HUB | Animal Hospital"
+TitleLabel.Text = "DARKNES HUB | Animal Hospital (English)"
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.Parent = TopBar
 
@@ -125,7 +125,7 @@ FloatBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Animasi Buka Pertama Kali
+-- Animasi Buka Pertama Kali (Smooth Memanjang ke Atas)
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 TS:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 580, 0, 380)}):Play()
 
@@ -431,4 +431,4 @@ unBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
-print("DARKNES HUB Loaded Successfully!")
+print("DARKNES HUB | Animal Hospital Loaded Successfully!")
