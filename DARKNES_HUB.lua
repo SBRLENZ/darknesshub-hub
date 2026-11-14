@@ -1,35 +1,33 @@
---[[ DARKNES HUB - MAIN LOADER ]]
-local baseUrl = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
-local bypass = "?t=" .. os.time()
+local repo = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
+local cacheBypass = "?t=" .. tostring(os.time())
 
-local function loadScript(file)
-    local s, err = pcall(function()
-        loadstring(game:HttpGet(baseUrl .. file .. bypass))()
+local function boot(scriptName)
+    local status, res = pcall(function()
+        loadstring(game:HttpGet(repo .. scriptName .. cacheBypass))()
     end)
-    if not s then
+    if not status then
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "DARKNES HUB ERROR",
-            Text = "Failed to load " .. file .. ": " .. tostring(err),
-            Duration = 5
+            Text = "Failed to compile module: " .. tostring(res),
+            Duration = 6
         })
     end
 end
 
--- Deteksi game secara fleksibel
-local success, gameName = pcall(function()
+local ok, info = pcall(function()
     return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 end)
 
-local lowerName = success and gameName:lower() or ""
+local gName = ok and info:lower() or ""
 
--- ROUTER MODUL GAME
-if lowerName:find("rumah opa") or lowerName:find("opah") then
-    loadScript("darknesopah.lua")
-elseif lowerName:find("evade") or lowerName:find("menghindar") or lowerName:find("hlwn") or workspace:FindFirstChild("Nextbots") then
-    loadScript("darknesevade.lua")
-elseif lowerName:find("brookhaven") or lowerName:find("brook") then
-    loadScript("darknesbrookhaven.lua")
+if gName:find("rumah opa") or gName:find("opah") then
+    boot("darknesopah.lua")
+elseif gName:find("evade") or gName:find("menghindar") or workspace:FindFirstChild("Nextbots") then
+    boot("darknesevade.lua")
+elseif gName:find("animal") or gName:find("hospital") or workspace:FindFirstChild("Patient") or workspace:FindFirstChild("Patients") then
+    boot("darknesanimalhospital.lua")
+elseif gName:find("brookhaven") or gName:find("brook") then
+    boot("darknesbrookhaven.lua")
 else
-    -- Fallback aman jika judul game tidak terbaca sempurna
-    loadScript("darknesbrookhaven.lua")
+    boot("darknesbrookhaven.lua")
 end
