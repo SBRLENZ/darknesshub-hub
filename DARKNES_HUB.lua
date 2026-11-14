@@ -1,5 +1,5 @@
 local repo = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
-local cacheBypass = "?t=" .. tostring(os.time())
+local cacheBypass = "?t=" .. tostring(tick())
 
 local function boot(scriptName)
     local status, res = pcall(function()
@@ -19,7 +19,7 @@ local ok, info = pcall(function()
 end)
 local gName = ok and info:lower() or ""
 
--- Scanner Dual Language (ID + EN) & Workspace Check
+-- Deteksi router utama dengan dukungan nama map Indo & Inggris
 if gName:find("rumah opa") or gName:find("opah") then
     boot("darknesopah.lua")
 elseif gName:find("evade") or gName:find("menghindar") or workspace:FindFirstChild("Nextbots") then
