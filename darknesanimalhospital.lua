@@ -6,17 +6,16 @@ local Lgt = game:GetService("Lighting")
 local LP = Plrs.LocalPlayer
 
 local Win = Lib:CreateWindow({
-   Name = "DARKNES HUB | Animal Hospital (ID/EN)",
+   Name = "DARKNES HUB | Animal Hospital Fixed",
    LoadingTitle = "DARKNES HUB ULTIMATE",
    LoadingSubtitle = "SBRLENZ",
-   ConfigurationSaving = { Enabled = true, FolderName = "DarknesCfg", FileName = "AnimalHospitalDual" },
+   ConfigurationSaving = { Enabled = true, FolderName = "DarknesCfg", FileName = "AnimalHospitalFix" },
    KeySystem = false
 })
 
 local function root() return LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") end
 local function hum() return LP.Character and LP.Character:FindFirstChildOfClass("Humanoid") end
 
--- Helper pencocokan kata kunci Indo & Inggris
 local function match(str, list)
     if not str then return false end
     local low = str:lower()
@@ -27,11 +26,10 @@ local function match(str, list)
 end
 
 local kwAnomali = {"anomaly", "anomali", "glitch", "lilin", "candle", "monster", "ghost", "hantu", "rare", "boss"}
-local kwPasien  = {"patient", "pasien", "animal", "hewan", "pet", "kucing", "anjing", "cat", "dog"}
+local kwPasien  = {"patient", "pasien"} -- Hanya mendeteksi NPC/Pasien murni
 local kwObat    = {"med", "obat", "cure", "sembuh", "potion", "syringe", "suntik", "darah", "blood", "vitamin"}
 local kwDaftar  = {"register", "daftar", "reception", "resepsionis", "antri", "queue", "check in"}
-local kwPeriksa = {"treat", "obati", "examine", "periksa", "heal", "operasi", "surgery", "bedah"}
-local kwBeli    = {"buy", "beli", "purchase", "shop", "toko", "store"}
+local kwBeli    = {"buy", "beli", "purchase", "shop", "toko", "store", "robux"}
 local kwKopi    = {"coffee", "kopi", "brew", "seduh", "espresso"}
 local kwDokter  = {"doctor", "dokter", "timer", "waktu", "shift", "arrival", "datang"}
 
@@ -60,13 +58,14 @@ t1:CreateToggle({ Name = "ESP Anomali (Red)", CurrentValue = false, Callback = f
     end)
 end })
 
-t1:CreateToggle({ Name = "ESP Patient / Pasien (Blue)", CurrentValue = false, Callback = function(v)
+t1:CreateToggle({ Name = "ESP Patient Murni (Blue)", CurrentValue = false, Callback = function(v)
     espPat = v
     task.spawn(function()
         while espPat do
             for _, o in ipairs(WS:GetDescendants()) do
+                -- Wajib berupa Model dan memiliki Humanoid atau bagian tubuh pasien agar tidak nyangkut ke meja/kertas
                 if o:IsA("Model") and not Plrs:GetPlayerFromCharacter(o) then
-                    if match(o.Name, kwPasien) and not o:FindFirstChild("_espPat") then
+                    if (match(o.Name, kwPasien) or o:FindFirstChildOfClass("Humanoid")) and not o:FindFirstChild("_espPat") then
                         local h = Instance.new("Highlight", o)
                         h.Name = "_espPat"
                         h.FillColor = Color3.fromRGB(0, 150, 255)
@@ -117,18 +116,10 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- TAB 2: AUTO FARM (ID & EN SCANNER)
+-- TAB 2: AUTO FARM (FIXED FILTERS)
 -- ==========================================
 local t2 = Win:CreateTab("Auto", 4483362458)
 local autoPatSeq, autoBuyFlag, autoTreatAll, autoKillAnom = false, false, false, false
-local selectedRoom = "Kamar 1 / Room 1"
-
-t2:CreateDropdown({
-    Name = "Pilih Kamar / Select Room",
-    Options = {"Kamar 1 / Room 1", "Kamar 2 / Room 2", "Kamar 3 / Room 3", "Kamar 4 / Room 4", "Kamar 5 / Room 5", "Kamar 6 / Room 6", "Kamar 7 / Room 7", "Kamar 8 (Operasi/Surgery)"},
-    CurrentOption = "Kamar 1 / Room 1",
-    Callback = function(v) selectedRoom = v end
-})
 
 t2:CreateToggle({ Name = "Auto Patient (Ambil Obat 1-1)", CurrentValue = false, Callback = function(v)
     autoPatSeq = v
@@ -156,7 +147,7 @@ t2:CreateToggle({ Name = "Auto Patient (Ambil Obat 1-1)", CurrentValue = false, 
     end)
 end })
 
-t2:CreateToggle({ Name = "Auto Buy Item (Toko / Shop)", CurrentValue = false, Callback = function(v)
+t2:CreateToggle({ Name = "Auto Buy Item (Exclude Robux)", CurrentValue = false, Callback = function(v)
     autoBuyFlag = v
     task.spawn(function()
         while autoBuyFlag do
@@ -164,13 +155,17 @@ t2:CreateToggle({ Name = "Auto Buy Item (Toko / Shop)", CurrentValue = false, Ca
             if r then
                 for _, pr in ipairs(WS:GetDescendants()) do
                     if not autoBuyFlag then break end
-                    if pr:IsA("ProximityPrompt") and (match(pr.ActionText, kwBeli) or match(pr.ObjectText, kwBeli)) then
-                        local part = pr.Parent:IsA("BasePart") and pr.Parent or pr.Parent:FindFirstChildWhichIsA("BasePart")
-                        if part then
-                            r.CFrame = part.CFrame + Vector3.new(0, 3, 0)
-                            task.wait(0.3)
-                            if fireproximityprompt then fireproximityprompt(pr) end
-                            task.wait(0.5)
+                    if pr:IsA("ProximityPrompt") then
+                        local textAll = (pr.ActionText .. " " .. pr.ObjectText):lower()
+                        -- Pastikan murni item game, TIDAK MENGANDUNG KATA ROBUX ATAU PEMBELIAN PREMIUM
+                        if (match(textAll, kwBeli) or match(textAll, kwObat)) and not textAll:find("robux") then
+                            local part = pr.Parent:IsA("BasePart") and pr.Parent or pr.Parent:FindFirstChildWhichIsA("BasePart")
+                            if part then
+                                r.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+                                task.wait(0.3)
+                                if fireproximityprompt then fireproximityprompt(pr) end
+                                task.wait(0.5)
+                            end
                         end
                     end
                 end
@@ -180,7 +175,7 @@ t2:CreateToggle({ Name = "Auto Buy Item (Toko / Shop)", CurrentValue = false, Ca
     end)
 end })
 
-t2:CreateToggle({ Name = "Auto Obati Semua Pasien & Kamar 8", CurrentValue = false, Callback = function(v)
+t2:CreateToggle({ Name = "Auto Obati Semua Pasien", CurrentValue = false, Callback = function(v)
     autoTreatAll = v
     task.spawn(function()
         while autoTreatAll do
@@ -206,7 +201,7 @@ t2:CreateToggle({ Name = "Auto Obati Semua Pasien & Kamar 8", CurrentValue = fal
     end)
 end })
 
-t2:CreateToggle({ Name = "Auto Kill Anomali & Lilin (Candles)", CurrentValue = false, Callback = function(v)
+t2:CreateToggle({ Name = "Auto Kill Anomali & Lilin", CurrentValue = false, Callback = function(v)
     autoKillAnom = v
     task.spawn(function()
         while autoKillAnom do
@@ -233,7 +228,7 @@ t2:CreateToggle({ Name = "Auto Kill Anomali & Lilin (Candles)", CurrentValue = f
 end })
 
 -- ==========================================
--- TAB 3: EXCLUSIVE (SAFE NOCLIP, KOPI, DAFTAR)
+-- TAB 3: EXCLUSIVE (SAFE NOCLIP, KOPI FIX)
 -- ==========================================
 local t3 = Win:CreateTab("Exclusive", 4483362458)
 local safeNoclip, autoCoffee, autoRegAll = false, false, false
@@ -256,20 +251,27 @@ RS.Stepped:Connect(function()
     end
 end)
 
-t3:CreateToggle({ Name = "Auto Ambil Kopi (TP Ready)", CurrentValue = false, Callback = function(v)
+t3:CreateToggle({ Name = "Auto Ambil Kopi (Clean / No Robux)", CurrentValue = false, Callback = function(v)
     autoCoffee = v
     task.spawn(function()
         while autoCoffee do
             local r = root()
             if r then
                 for _, obj in ipairs(WS:GetDescendants()) do
+                    if not autoCoffee then break end
                     if match(obj.Name, kwKopi) then
                         local target = obj:IsA("Model") and (obj:FindFirstChild("Handle") or obj:FindFirstChildWhichIsA("BasePart")) or (obj:IsA("BasePart") and obj)
                         if target then
-                            r.CFrame = target.CFrame + Vector3.new(0, 3, 0)
-                            task.wait(0.3)
+                            -- Pastikan mengecek prompt di dalam mesin kopi tidak berbau Robux/Beli toko
                             for _, pr in ipairs(obj:GetDescendants()) do
-                                if pr:IsA("ProximityPrompt") and fireproximityprompt then fireproximityprompt(pr) end
+                                if pr:IsA("ProximityPrompt") then
+                                    local pText = (pr.ActionText .. " " .. pr.ObjectText):lower()
+                                    if not pText:find("robux") and not pText:find("beli") then
+                                        r.CFrame = target.CFrame + Vector3.new(0, 3, 0)
+                                        task.wait(0.3)
+                                        if fireproximityprompt then fireproximityprompt(pr) end
+                                    end
+                                end
                             end
                         end
                     end
@@ -280,22 +282,21 @@ t3:CreateToggle({ Name = "Auto Ambil Kopi (TP Ready)", CurrentValue = false, Cal
     end)
 end })
 
-t3:CreateToggle({ Name = "Instant Daftar Pasien & Respawn", CurrentValue = false, Callback = function(v)
+t3:CreateToggle({ Name = "Instant Daftar Pasien (Fixed No Spawn Teleport)", CurrentValue = false, Callback = function(v)
     autoRegAll = v
     task.spawn(function()
         while autoRegAll do
             local r = root()
             if r then
                 for _, pr in ipairs(WS:GetDescendants()) do
+                    if not autoRegAll then break end
                     if pr:IsA("ProximityPrompt") and (match(pr.ActionText, kwDaftar) or match(pr.ObjectText, kwDaftar)) then
                         local part = pr.Parent:IsA("BasePart") and pr.Parent or pr.Parent:FindFirstChildWhichIsA("BasePart")
                         if part then
                             r.CFrame = part.CFrame + Vector3.new(0, 3, 0)
                             task.wait(0.25)
                             if fireproximityprompt then fireproximityprompt(pr) end
-                            task.wait(0.3)
-                            local sp = WS:FindFirstChildWhichIsA("SpawnLocation", true)
-                            if sp then r.CFrame = sp.CFrame + Vector3.new(0, 3, 0) end
+                            task.wait(0.5) -- Hapus paksaan teleport ke spawn agar karakter tidak mental keluar/nyangkut
                         end
                     end
                 end
