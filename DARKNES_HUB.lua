@@ -1,25 +1,40 @@
-local url = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
-local bypass = "?v=" .. tostring(tick())
+--[[ DARKNES HUB - MAIN LOADER ]]
+local baseUrl = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
+local bypass = "?t=" .. os.time()
 
-local GameName = string.lower(game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name)
-local PlaceId = game.PlaceId
+local success, gameName = pcall(function()
+    return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+end)
 
-local function Load(scr)
-    -- Sengaja tanpa pcall biar error-nya kelihatan di Console (F9)
-    loadstring(game:HttpGet(url .. scr .. bypass))()
+if not success or not gameName then gameName = "Unknown" end
+local lowerName = gameName:lower()
+local placeId = game.PlaceId
+
+local function loadScript(file)
+    local s, err = pcall(function()
+        loadstring(game:HttpGet(baseUrl .. file .. bypass))()
+    end)
+    if not s then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "DARKNES HUB ERROR",
+            Text = "Gagal memuat " .. file .. ": " .. tostring(err),
+            Duration = 5
+        })
+    end
 end
 
-if PlaceId == 750114916 or GameName:find("opah") or GameName:find("malam") or GameName:find("nenek") or GameName:find("rumah") then
-    Load("darknesopah.lua")
-elseif GameName:find("brookhaven") then
-    Load("darknesbrookhaven.lua")
-elseif GameName:find("evade") then
-    Load("darknesevade.lua")
+-- DETEKSI GAME / MAP OPPAH (Malam Bersama Opah & Rumah Opah)
+if lowerName:find("opah") or lowerName:find("malam") or lowerName:find("nenek") or lowerName:find("rumah opah") then
+    loadScript("darknesopah.lua")
+elseif lowerName:find("brookhaven") or lowerName:find("brook") then
+    loadScript("darknesbrookhaven.lua")
+elseif lowerName:find("evade") then
+    loadScript("darknesevade.lua")
 else
+    -- Fallback / Notifikasi kalau game belum terdaftar
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "DARKNES HUB", 
-        Text = "Game tidak dikenali (" .. GameName .. "). Memaksa load Opah...", 
-        Duration = 5
+        Title = "DARKNES HUB",
+        Text = "Game tidak didukung: " .. gameName,
+        Duration = 4
     })
-    Load("darknesopah.lua")
 end
