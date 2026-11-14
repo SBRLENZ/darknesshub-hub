@@ -1,4 +1,4 @@
---[[ DARKNES HUB - RUMAH OPA / OPAH (FULL FUNCTIONAL) ]]
+--[[ DARKNES HUB - RUMAH OPA / OPAH ]]
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Players = game:GetService("Players")
@@ -20,7 +20,7 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- ==========================================
--- HELPER FUNCTIONS (SMART SCANNER & UTILS)
+-- HELPER FUNCTIONS
 -- ==========================================
 local function getRoot()
     local char = LocalPlayer.Character
@@ -50,7 +50,6 @@ end
 local function interactWith(obj)
     local root = getRoot()
     if not root then return end
-    -- Trigger TouchInterest jika ada
     for _, v in ipairs(obj:GetDescendants()) do
         if v:IsA("TouchTransmitter") and v.Parent:IsA("BasePart") and firetouchinterest then
             firetouchinterest(root, v.Parent, 0)
@@ -84,7 +83,6 @@ local function findEntities(keywords, excludeKeywords)
                 end
             end
             if match and not obj:IsDescendantOf(LocalPlayer.Character or Workspace) then
-                -- Pastikan bukan bagian dari karakter player
                 if not Players:GetPlayerFromCharacter(obj) and not Players:GetPlayerFromCharacter(obj.Parent) then
                     table.insert(found, obj)
                 end
@@ -106,7 +104,6 @@ local function findOpah()
     return nil
 end
 
--- Sistem ESP Universal
 local espHighlights = {}
 local function clearESP(category)
     if espHighlights[category] then
@@ -158,16 +155,16 @@ end
 local MainTab = Window:CreateTab("Main", 4483362458)
 
 MainTab:CreateParagraph({
-   Title = "Halo " .. LocalPlayer.Name .. "!",
-   Content = "Note: Script ini masih tahap pengembangan dan bertemakan Rayfield. Tunggu update dari admin di komunitas resmi Darknes Hub.\n\nJoin Discord Darknes Hub:\nhttps://discord.gg/jzDxbbJhy"
+   Title = "Welcome, " .. LocalPlayer.Name .."!",
+   Content = "Note: This script is still in development and uses Rayfield UI. Please wait for official updates from admins in our community.\n\nJoin Darknes Hub Discord:\nhttps://discord.gg/jzDxbbJhy"
 })
 
 MainTab:CreateButton({
-   Name = "Copy Link Discord",
+   Name = "Copy Discord Link",
    Callback = function()
        if setclipboard then
            setclipboard("https://discord.gg/jzDxbbJhy")
-           Rayfield:Notify({Title = "Berhasil", Content = "Link Discord disalin ke clipboard!", Duration = 3})
+           Rayfield:Notify({Title = "Success", Content = "Discord link copied to clipboard!", Duration = 3})
        end
    end,
 })
@@ -181,7 +178,7 @@ VisualTab:CreateSection("ESP Features")
 local espLoops = {}
 
 VisualTab:CreateToggle({
-   Name = "ESP Nenek / Opah",
+   Name = "ESP Opah",
    CurrentValue = false,
    Flag = "EspNenek",
    Callback = function(Value)
@@ -190,9 +187,7 @@ VisualTab:CreateToggle({
        task.spawn(function()
            while espLoops.Nenek do
                local opah = findOpah()
-               if opah then
-                   applyESP("Nenek", {opah}, Color3.fromRGB(255, 0, 0), "[OPAH] ")
-               end
+               if opah then applyESP("Nenek", {opah}, Color3.fromRGB(255, 0, 0), "[OPAH] ") end
                task.wait(1.5)
            end
        end)
@@ -200,7 +195,7 @@ VisualTab:CreateToggle({
 })
 
 VisualTab:CreateToggle({
-   Name = "ESP Kunci (Bukan Gembok)",
+   Name = "ESP Keys (Excludes Locks)",
    CurrentValue = false,
    Flag = "EspKunci",
    Callback = function(Value)
@@ -209,7 +204,7 @@ VisualTab:CreateToggle({
        task.spawn(function()
            while espLoops.Kunci do
                local keys = findEntities({"key", "kunci"}, {"lock", "gembok", "padlock", "door", "pintu"})
-               applyESP("Kunci", keys, Color3.fromRGB(255, 215, 0), "[KUNCI] ")
+               applyESP("Kunci", keys, Color3.fromRGB(255, 215, 0), "[KEY] ")
                task.wait(2)
            end
        end)
@@ -217,7 +212,7 @@ VisualTab:CreateToggle({
 })
 
 VisualTab:CreateToggle({
-   Name = "ESP Code",
+   Name = "ESP Codes",
    CurrentValue = false,
    Flag = "EspCode",
    Callback = function(Value)
@@ -243,7 +238,7 @@ VisualTab:CreateToggle({
        task.spawn(function()
            while espLoops.FlipFlop do
                local sandals = findEntities({"flip", "flop", "sandal", "sendal", "slipper"})
-               applyESP("FlipFlop", sandals, Color3.fromRGB(0, 255, 100), "[SANDAL] ")
+               applyESP("FlipFlop", sandals, Color3.fromRGB(0, 255, 100), "[FLIP-FLOP] ")
                task.wait(2)
            end
        end)
@@ -269,7 +264,7 @@ warnLabel.Parent = warnGui
 
 local warningActive = false
 VisualTab:CreateToggle({
-   Name = "Opah Warning (!)",
+   Name = "Opah Warning Indicator (!)",
    CurrentValue = false,
    Flag = "OpahWarning",
    Callback = function(Value)
@@ -285,11 +280,11 @@ VisualTab:CreateToggle({
                        if opahPos then
                            local dist = (root.Position - opahPos.Position).Magnitude
                            if dist <= 30 then
-                               warnLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Sangat Dekat: Merah
+                               warnLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Very Close: Red
                            elseif dist <= 65 then
-                               warnLabel.TextColor3 = Color3.fromRGB(255, 230, 0) -- Agak Dekat: Kuning
+                               warnLabel.TextColor3 = Color3.fromRGB(255, 230, 0) -- Close: Yellow
                            else
-                               warnLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Jauh: Putih
+                               warnLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Far: White
                            end
                        end
                    else
@@ -352,107 +347,94 @@ VisualTab:CreateToggle({
 -- TAB 3: TELEPORT
 -- ==========================================
 local TeleportTab = Window:CreateTab("Teleport", 4483362458)
-TeleportTab:CreateSection("Lokasi")
+TeleportTab:CreateSection("Location Teleports")
 
 TeleportTab:CreateButton({
-   Name = "Teleport ke Dapur (Atas Meja)",
+   Name = "Teleport to Kitchen Table",
    Callback = function()
        local tables = findEntities({"kitchen", "dapur", "meja", "table"})
        for _, t in ipairs(tables) do
            local cf = getObjPos(t)
            if cf then
                tpTo(cf + Vector3.new(0, 4, 0))
-               Rayfield:Notify({Title = "Teleport", Content = "Berhasil ke Dapur!", Duration = 2})
+               Rayfield:Notify({Title = "Teleport", Content = "Teleported to Kitchen Table!", Duration = 2})
                return
            end
        end
-       Rayfield:Notify({Title = "Gagal", Content = "Meja dapur tidak ditemukan otomatis.", Duration = 3})
+       Rayfield:Notify({Title = "Failed", Content = "Kitchen table not found automatically.", Duration = 3})
    end,
 })
 
 TeleportTab:CreateButton({
-   Name = "Teleport ke Safe Zone (Respawn)",
+   Name = "Teleport to Safe Zone (Respawn)",
    Callback = function()
        local spawn = Workspace:FindFirstChildWhichIsA("SpawnLocation", true)
        if spawn then
            tpTo(spawn.CFrame)
-           Rayfield:Notify({Title = "Teleport", Content = "Teleport ke Safe Zone!", Duration = 2})
+           Rayfield:Notify({Title = "Teleport", Content = "Teleported to Safe Zone!", Duration = 2})
        else
            local safes = findEntities({"safe", "spawn", "lobby", "start"})
-           if safes[1] and getObjPos(safes[1]) then
-               tpTo(getObjPos(safes[1]))
-           end
+           if safes[1] and getObjPos(safes[1]) then tpTo(getObjPos(safes[1])) end
        end
    end,
 })
 
 TeleportTab:CreateButton({
-   Name = "Teleport ke Opah",
+   Name = "Teleport to Opah",
    Callback = function()
        local opah = findOpah()
-       if opah and getObjPos(opah) then
-           tpTo(getObjPos(opah))
-       else
-           Rayfield:Notify({Title = "Info", Content = "Opah sedang tidak ada di map.", Duration = 3})
-       end
+       if opah and getObjPos(opah) then tpTo(getObjPos(opah))
+       else Rayfield:Notify({Title = "Info", Content = "Opah is not currently spawned.", Duration = 3}) end
    end,
 })
 
-TeleportTab:CreateSection("Item Teleport")
+TeleportTab:CreateSection("Item Teleports")
 
 local selectedKeyName = ""
 local keyDropdown = TeleportTab:CreateDropdown({
-   Name = "Pilih Kunci",
-   Options = {"Refresh Kunci Dulu"},
-   CurrentOption = "Refresh Kunci Dulu",
-   Flag = "PilihKunci",
+   Name = "Select Key",
+   Options = {"Refresh Keys First"},
+   CurrentOption = "Refresh Keys First",
+   Flag = "SelectKey",
    Callback = function(Option)
        selectedKeyName = type(Option) == "table" and Option[1] or Option
    end,
 })
 
 TeleportTab:CreateButton({
-   Name = "Refresh Daftar Kunci",
+   Name = "Refresh Key List",
    Callback = function()
        local keys = findEntities({"key", "kunci"}, {"lock", "gembok", "padlock", "door"})
        local names = {}
-       for _, k in ipairs(keys) do
-           table.insert(names, k.Name)
-       end
-       if #names == 0 then names = {"Tidak ada kunci"} end
+       for _, k in ipairs(keys) do table.insert(names, k.Name) end
+       if #names == 0 then names = {"No keys found"} end
        keyDropdown:Refresh(names)
    end,
 })
 
 TeleportTab:CreateButton({
-   Name = "Teleport ke Kunci Terpilih",
+   Name = "Teleport to Selected Key",
    Callback = function()
        local keys = findEntities({"key", "kunci"}, {"lock", "gembok", "padlock", "door"})
        for _, k in ipairs(keys) do
            if k.Name == selectedKeyName or selectedKeyName == "" then
                local cf = getObjPos(k)
-               if cf then
-                   tpTo(cf)
-                   return
-               end
+               if cf then tpTo(cf) return end
            end
        end
-       Rayfield:Notify({Title = "Info", Content = "Kunci tidak ditemukan!", Duration = 2})
+       Rayfield:Notify({Title = "Info", Content = "Key not found!", Duration = 2})
    end,
 })
 
 TeleportTab:CreateButton({
-   Name = "Teleport ke Code",
+   Name = "Teleport to Code",
    Callback = function()
        local codes = findEntities({"code", "kode", "paper", "kertas", "note", "catatan"})
        for _, c in ipairs(codes) do
            local cf = getObjPos(c)
-           if cf then
-               tpTo(cf)
-               return
-           end
+           if cf then tpTo(cf) return end
        end
-       Rayfield:Notify({Title = "Info", Content = "Code tidak ditemukan!", Duration = 2})
+       Rayfield:Notify({Title = "Info", Content = "Code not found!", Duration = 2})
    end,
 })
 
@@ -460,10 +442,9 @@ TeleportTab:CreateButton({
 -- TAB 4: AUTO FARM
 -- ==========================================
 local FarmTab = Window:CreateTab("Auto Farm", 4483362458)
-
 local farmFlipFlop = false
 FarmTab:CreateToggle({
-   Name = "Farm Flip Flop (Ambil Semua Otomatis)",
+   Name = "Auto Farm Flip Flop (Collect All)",
    CurrentValue = false,
    Flag = "FarmFlipFlop",
    Callback = function(Value)
@@ -475,11 +456,7 @@ FarmTab:CreateToggle({
                    for _, s in ipairs(sandals) do
                        if not farmFlipFlop then break end
                        local cf = getObjPos(s)
-                       if cf then
-                           tpTo(cf)
-                           task.wait(0.15)
-                           interactWith(s)
-                       end
+                       if cf then tpTo(cf) task.wait(0.15) interactWith(s) end
                    end
                    task.wait(1)
                end
@@ -489,18 +466,17 @@ FarmTab:CreateToggle({
 })
 
 -- ==========================================
--- TAB 5: EKSKLUSIF
+-- TAB 5: EXCLUSIVE
 -- ==========================================
-local EksklusifTab = Window:CreateTab("Eksklusif", 4483362458)
+local EksklusifTab = Window:CreateTab("Exclusive", 4483362458)
+EksklusifTab:CreateSection("Player Mods")
 
 -- 1. NOCLIP
 local noclipActive = false
 RunService.Stepped:Connect(function()
     if noclipActive and LocalPlayer.Character then
         for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
+            if part:IsA("BasePart") then part.CanCollide = false end
         end
     end
 end)
@@ -509,9 +485,7 @@ EksklusifTab:CreateToggle({
    Name = "Noclip",
    CurrentValue = false,
    Flag = "Noclip",
-   Callback = function(Value)
-       noclipActive = Value
-   end,
+   Callback = function(Value) noclipActive = Value end,
 })
 
 -- 2. WALKSPEED
@@ -530,20 +504,17 @@ EksklusifTab:CreateSlider({
    end,
 })
 
--- Kunci speed agar tidak di-reset game saat lari/jongkok
 RunService.Heartbeat:Connect(function()
     if targetSpeed > 16 and LocalPlayer.Character then
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum and hum.WalkSpeed ~= targetSpeed then
-            hum.WalkSpeed = targetSpeed
-        end
+        if hum and hum.WalkSpeed ~= targetSpeed then hum.WalkSpeed = targetSpeed end
     end
 end)
 
--- 3. AUTO RUN (Anti Opah Detect -> Teleport Safezone -> Balik)
+-- 3. AUTO RUN (Anti Opah Detect -> Teleport Safezone -> Return)
 local autoRunActive = false
 EksklusifTab:CreateToggle({
-   Name = "Auto Run (Kabur Otomatis ke Safe Zone)",
+   Name = "Auto Run (Escape to Safe Zone)",
    CurrentValue = false,
    Flag = "AutoRun",
    Callback = function(Value)
@@ -564,12 +535,12 @@ EksklusifTab:CreateToggle({
                                savedPos = root.CFrame
                                isHiding = true
                                tpTo(spawn.CFrame)
-                               Rayfield:Notify({Title = "Auto Run", Content = "Opah terlalu dekat! Kabur ke Safe Zone...", Duration = 2})
+                               Rayfield:Notify({Title = "Auto Run", Content = "Opah is too close! Escaping to Safe Zone...", Duration = 2})
                            elseif dist > 45 and isHiding and savedPos then
                                tpTo(savedPos)
                                isHiding = false
                                savedPos = nil
-                               Rayfield:Notify({Title = "Auto Run", Content = "Opah sudah menjauh, kembali ke posisi awal.", Duration = 2})
+                               Rayfield:Notify({Title = "Auto Run", Content = "Opah left, returning to previous position.", Duration = 2})
                            end
                        end
                    end
@@ -580,9 +551,9 @@ EksklusifTab:CreateToggle({
    end,
 })
 
--- 4. INVISIBLE (Tubuh & Nama Tersembunyi Secara Visual, Opah Tetap Mengejar)
+-- 4. INVISIBLE
 EksklusifTab:CreateToggle({
-   Name = "Invisible (Visual Tubuh & Nama Hilang)",
+   Name = "Invisible (Hide Body & Name)",
    CurrentValue = false,
    Flag = "Invisible",
    Callback = function(Value)
@@ -604,10 +575,10 @@ EksklusifTab:CreateToggle({
    end,
 })
 
--- 5. INSTANT UNLOCK GEMBOK (Otomatis Teleport ke Gembok Sesuai Kunci yang Dipegang)
+-- 5. INSTANT UNLOCK LOCK
 local instantUnlockActive = false
 EksklusifTab:CreateToggle({
-   Name = "Instant Unlock Gembok (Auto Buka Sesuai Kunci)",
+   Name = "Instant Unlock Lock (Auto Match Key)",
    CurrentValue = false,
    Flag = "InstantUnlock",
    Callback = function(Value)
@@ -633,7 +604,6 @@ EksklusifTab:CreateToggle({
                    for _, tool in ipairs(heldTools) do
                        local tName = tool.Name:lower()
                        if tName:find("key") or tName:find("kunci") then
-                           -- Ambil kata kunci spesifik (misal: "red", "merah", "blue", "biru", "master", "kamar", "exit", "utama")
                            local cleanKey = tName:gsub("key", ""):gsub("kunci", ""):gsub("%s+", "")
                            local locks = findEntities({"lock", "gembok", "padlock", "door", "pintu"}, {"key", "kunci"})
                            
@@ -642,17 +612,15 @@ EksklusifTab:CreateToggle({
                                if (cleanKey ~= "" and lName:find(cleanKey)) or cleanKey == "" then
                                    local cf = getObjPos(lock)
                                    if cf then
-                                       -- Equip kunci dulu ke tangan
                                        local hum = char and char:FindFirstChildOfClass("Humanoid")
                                        if hum and tool.Parent == backpack then
                                            hum:EquipTool(tool)
                                            task.wait(0.1)
                                        end
-                                       -- Teleport dan langsung buka gemboknya
                                        tpTo(cf)
                                        task.wait(0.15)
                                        interactWith(lock)
-                                       Rayfield:Notify({Title = "Instant Unlock", Content = "Membuka gembok dengan: " .. tool.Name, Duration = 2})
+                                       Rayfield:Notify({Title = "Instant Unlock", Content = "Unlocked using: " .. tool.Name, Duration = 2})
                                        task.wait(1)
                                        break
                                    end
