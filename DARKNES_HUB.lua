@@ -16,23 +16,23 @@ local function loadScript(file)
     if not s then
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "DARKNES HUB ERROR",
-            Text = "Gagal memuat " .. file .. ": " .. tostring(err),
+            Text = "Failed to load " .. file .. ": " .. tostring(err),
             Duration = 5
         })
     end
 end
 
--- HANYA DETEKSI MAP "RUMAH OPA" / "RUMAH OPAH"
+-- MAP / GAME DETECTION
 if lowerName:find("rumah opa") then
     loadScript("darknesopah.lua")
-elseif lowerName:find("brookhaven") or lowerName:find("brook") then
-    loadScript("darknesbrookhaven.lua")
 elseif lowerName:find("evade") then
     loadScript("darknesevade.lua")
+elseif lowerName:find("brookhaven") or lowerName:find("brook") then
+    loadScript("darknesbrookhaven.lua")
 else
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "DARKNES HUB",
-        Text = "Game tidak didukung: " .. gameName,
+        Text = "Game not supported: " .. gameName,
         Duration = 4
     })
 end
