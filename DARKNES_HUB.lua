@@ -23,15 +23,14 @@ local function loadScript(file)
     end
 end
 
--- DETEKSI GAME / MAP OPPAH (Malam Bersama Opah & Rumah Opah)
-if lowerName:find("opah") or lowerName:find("malam") or lowerName:find("nenek") or lowerName:find("rumah opah") then
+-- DETEKSI GAME / MAP OPPAH & RUMAH OPA
+if lowerName:find("opah") or lowerName:find("opa") or lowerName:find("malam") or lowerName:find("nenek") or lowerName:find("rumah") then
     loadScript("darknesopah.lua")
 elseif lowerName:find("brookhaven") or lowerName:find("brook") then
     loadScript("darknesbrookhaven.lua")
 elseif lowerName:find("evade") then
     loadScript("darknesevade.lua")
 else
-    -- Fallback / Notifikasi kalau game belum terdaftar
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "DARKNES HUB",
         Text = "Game tidak didukung: " .. gameName,
