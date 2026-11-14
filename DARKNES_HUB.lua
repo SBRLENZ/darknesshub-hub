@@ -8,7 +8,6 @@ end)
 
 if not success or not gameName then gameName = "Unknown" end
 local lowerName = gameName:lower()
-local placeId = game.PlaceId
 
 local function loadScript(file)
     local s, err = pcall(function()
@@ -23,8 +22,8 @@ local function loadScript(file)
     end
 end
 
--- DETEKSI GAME / MAP OPPAH & RUMAH OPA
-if lowerName:find("opah") or lowerName:find("opa") or lowerName:find("malam") or lowerName:find("nenek") or lowerName:find("rumah") then
+-- HANYA DETEKSI MAP "RUMAH OPA" / "RUMAH OPAH"
+if lowerName:find("rumah opa") then
     loadScript("darknesopah.lua")
 elseif lowerName:find("brookhaven") or lowerName:find("brook") then
     loadScript("darknesbrookhaven.lua")
