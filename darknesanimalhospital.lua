@@ -22,16 +22,84 @@ local function go(cf)
 end
 
 -- ==========================================
--- TAB 1: MAIN & HUB
+-- TAB 1: VISUAL & ESP ANOMALI
 -- ==========================================
-local t1 = Win:CreateTab("Main", 4483362458)
-t1:CreateParagraph({ Title = "Operator: " .. LP.Name, Content = "Status: OP Features Active\nDiscord: https://discord.gg/jzDxbbJhy" })
-t1:CreateButton({ Name = "Copy Discord Link", Callback = function() if setclipboard then setclipboard("https://discord.gg/jzDxbbJhy") end end })
-t1:CreateButton({ Name = "Rejoin Server", Callback = function() game:GetService("TeleportService"):Teleport(game.PlaceId, LP) end })
-t1:CreateButton({ Name = "Server Hop Hub", Callback = function() game:GetService("TeleportService"):Teleport(game.PlaceId, LP) end })
-t1:CreateButton({ Name = "Unlock Max Camera Zoom", Callback = function() LP.CameraMaxZoomDistance = 999999 end })
-t1:CreateButton({ Name = "Reset Camera FOV", Callback = function() WS.CurrentCamera.FieldOfView = 70 end })
-t1:CreateButton({ Name = "Hide Hub UI Menu", Callback = function() Lib:Hide() end })
+local t1 = Win:CreateTab("Visual ESP", 4483362458)
+local espAnomaly, espPet, espItem, espPlr, fbOn = false, false, false, false
+
+t1:CreateToggle({ Name = "ESP Anomali / Glitch / Rare Patient", CurrentValue = false, Callback = function(v)
+    espAnomaly = v
+    task.spawn(function()
+        while espAnomaly do
+            for _, o in ipairs(WS:GetDescendants()) do
+                if o:IsA("Model") and not Plrs:GetPlayerFromCharacter(o) then
+                    local nameL = o.Name:lower()
+                    if nameL:find("anomaly") or nameL:find("glitch") or nameL:find("rare") or nameL:find("boss") or nameL:find("special") then
+                        if not o:FindFirstChild("_anomalyHL") then
+                            local h = Instance.new("Highlight", o)
+                            h.Name = "_anomalyHL"
+                            h.FillColor = Color3.fromRGB(255, 0, 255)
+                            h.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        end
+                    end
+                end
+            end
+            task.wait(1.5)
+        end
+    end)
+end })
+
+t1:CreateToggle({ Name = "ESP Animals / Pets (Blue)", CurrentValue = false, Callback = function(v)
+    espPet = v
+    task.spawn(function()
+        while espPet do
+            for _, o in ipairs(WS:GetDescendants()) do
+                if o:IsA("Model") and (o:FindFirstChildOfClass("Humanoid") or o.Name:lower():find("pet") or o.Name:lower():find("animal")) and not Plrs:GetPlayerFromCharacter(o) then
+                    if not o:FindFirstChild("_petHL") then
+                        local h = Instance.new("Highlight", o)
+                        h.Name = "_petHL"
+                        h.FillColor = Color3.fromRGB(0, 150, 255)
+                    end
+                end
+            end
+            task.wait(1.5)
+        end
+    end)
+end })
+
+t1:CreateToggle({ Name = "ESP Players (Green)", CurrentValue = false, Callback = function(v)
+    espPlr = v
+    task.spawn(function()
+        while espPlr do
+            for _, p in ipairs(Plrs:GetPlayers()) do
+                if p ~= LP and p.Character and not p.Character:FindFirstChild("_plrHL") then
+                    local h = Instance.new("Highlight", p.Character)
+                    h.Name = "_plrHL"
+                    h.FillColor = Color3.fromRGB(0, 255, 0)
+                end
+            end
+            task.wait(1.5)
+        end
+    end)
+end })
+
+t1:CreateToggle({ Name = "Fullbright Lighting", CurrentValue = false, Callback = function(v)
+    fbOn = v
+    Lgt.Brightness = v and 3 or 1
+    Lgt.GlobalShadows = not v
+end })
+
+t1:CreateParagraph({ Title = "Doctor Timer Status", Content = "Checking doctor arrival time automatically..." })
+task.spawn(function()
+    while true do
+        for _, obj in ipairs(WS:GetDescendants()) do
+            if obj.Name:lower():find("timer") or obj.Name:lower():find("doctor") then
+                break
+            end
+        end
+        task.wait(3)
+    end
+end)
 
 -- ==========================================
 -- TAB 2: OP AUTO-FARM & HOSPITAL HACKS
@@ -116,132 +184,71 @@ t2:CreateButton({ Name = "Instant Interact All Prompts", Callback = function()
     for _, p in ipairs(WS:GetDescendants()) do if p:IsA("ProximityPrompt") then p.HoldDuration = 0 end end
 end })
 
-t2:CreateButton({ Name = "Fire All Proximity Prompts", Callback = function()
-    if fireproximityprompt then
-        for _, p in ipairs(WS:GetDescendants()) do if p:IsA("ProximityPrompt") then fireproximityprompt(p) end end
-    end
+-- ==========================================
+-- TAB 3: EXCLUSIVE (SAFE NOCLIP & COFFEE)
+-- ==========================================
+local t3 = Win:CreateTab("Exclusive", 4483362458)
+local safeNoclip, autoCoffee = false, false
+
+t3:CreateToggle({ Name = "Safe Noclip (Walls Only / No Floor Fall)", CurrentValue = false, Callback = function(v)
+    safeNoclip = v
 end })
 
--- ==========================================
--- TAB 3: VISUAL & ESP ANOMALI
--- ==========================================
-local t3 = Win:CreateTab("Visual ESP", 4483362458)
-local espAnomaly, espPet, espItem, espPlr = false, false, false, false
+RS.Stepped:Connect(function()
+    if safeNoclip and LP.Character then
+        local r = root()
+        for _, p in ipairs(LP.Character:GetDescendants()) do
+            if p:IsA("BasePart") then
+                -- Biarkan bagian kaki bawah tetap Colide agar tidak tembus lantai jatuh ke void
+                if p.Name ~= "HumanoidRootPart" and p.Name ~= "LeftFoot" and p.Name ~= "RightFoot" and p.Name ~= "LowerTorso" then
+                    p.CanCollide = false
+                end
+            end
+        end
+    end
+end)
 
-t3:CreateToggle({ Name = "ESP Anomali / Glitch / Rare Patient", CurrentValue = false, Callback = function(v)
-    espAnomaly = v
+t3:CreateToggle({ Name = "Auto Ambil Kopi (Teleport when ready)", CurrentValue = false, Callback = function(v)
+    autoCoffee = v
     task.spawn(function()
-        while espAnomaly do
-            for _, o in ipairs(WS:GetDescendants()) do
-                if o:IsA("Model") and not Plrs:GetPlayerFromCharacter(o) then
-                    local nameL = o.Name:lower()
-                    if nameL:find("anomaly") or nameL:find("glitch") or nameL:find("rare") or nameL:find("boss") or nameL:find("special") then
-                        if not o:FindFirstChild("_anomalyHL") then
-                            local h = Instance.new("Highlight", o)
-                            h.Name = "_anomalyHL"
-                            h.FillColor = Color3.fromRGB(255, 0, 255)
-                            h.OutlineColor = Color3.fromRGB(255, 255, 255)
+        while autoCoffee do
+            for _, obj in ipairs(WS:GetDescendants()) do
+                if obj.Name:lower():find("coffee") or obj.Name:lower():find("kopi") then
+                    local handle = obj:FindFirstChild("Handle") or obj:FindFirstChildWhichIsA("BasePart")
+                    local r = root()
+                    if handle and r then
+                        r.CFrame = handle.CFrame + Vector3.new(0, 3, 0)
+                        task.wait(0.3)
+                        for _, p in ipairs(obj:GetDescendants()) do
+                            if p:IsA("ProximityPrompt") then fireproximityprompt(p) end
                         end
                     end
                 end
             end
-            task.wait(1.5)
+            task.wait(3)
         end
     end)
 end })
 
-t3:CreateToggle({ Name = "ESP Animals / Pets", CurrentValue = false, Callback = function(v)
-    espPet = v
-    task.spawn(function()
-        while espPet do
-            for _, o in ipairs(WS:GetDescendants()) do
-                if o:IsA("Model") and (o:FindFirstChildOfClass("Humanoid") or o.Name:lower():find("pet") or o.Name:lower():find("animal")) and not Plrs:GetPlayerFromCharacter(o) then
-                    if not o:FindFirstChild("_petHL") then
-                        local h = Instance.new("Highlight", o)
-                        h.Name = "_petHL"
-                        h.FillColor = Color3.fromRGB(255, 100, 200)
-                    end
-                end
+t3:CreateButton({ Name = "Instant Skip Doctor Dialogue", Callback = function()
+    for _, gui in ipairs(LP.PlayerGui:GetDescendants()) do
+        if gui:IsA("TextButton") and (gui.Text:lower():find("skip") or gui.Text:lower():find("next")) then
+            for _, conn in ipairs(getconnections(gui.MouseButton1Click)) do
+                conn:Fire()
             end
-            task.wait(1.5)
         end
-    end)
+    end
 end })
 
-t3:CreateToggle({ Name = "ESP Medical Tools & Food", CurrentValue = false, Callback = function(v)
-    espItem = v
-    task.spawn(function()
-        while espItem do
-            for _, o in ipairs(WS:GetDescendants()) do
-                if o:IsA("Tool") or (o:IsA("BasePart") and (o.Name:lower():find("med") or o.Name:lower():find("food") or o.Name:lower():find("cure"))) then
-                    if not o:FindFirstChild("_itemHL") then
-                        local h = Instance.new("Highlight", o)
-                        h.Name = "_itemHL"
-                        h.FillColor = Color3.fromRGB(0, 255, 200)
-                    end
-                end
-            end
-            task.wait(1.5)
-        end
-    end)
-end })
-
-t3:CreateToggle({ Name = "Fullbright Lighting", CurrentValue = false, Callback = function(v) Lgt.Brightness = v and 3 or 1 Lgt.GlobalShadows = not v end })
-t3:CreateToggle({ Name = "Wide FOV 120", CurrentValue = false, Callback = function(v) WS.CurrentCamera.FieldOfView = v and 120 or 70 end })
-t3:CreateButton({ Name = "Remove Atmosphere Fog", Callback = function() for _, o in ipairs(Lgt:GetDescendants()) do if o:IsA("Atmosphere") then o.Density = 0 end end end })
-
 -- ==========================================
--- TAB 4: PLAYER & MOVEMENT
+-- TAB 4: TELEPORT & UTILITY
 -- ==========================================
-local t4 = Win:CreateTab("Player", 4483362458)
-local ws, jp, nc, ij = 16, 50, false, false
-
-t4:CreateSlider({ Name = "Custom WalkSpeed", Range = {16, 160}, Increment = 1, CurrentValue = 16, Callback = function(v) ws = v end })
-t4:CreateSlider({ Name = "Custom JumpPower", Range = {50, 220}, Increment = 5, CurrentValue = 50, Callback = function(v) jp = v end })
-t4:CreateToggle({ Name = "Noclip Walk Through Walls", CurrentValue = false, Callback = function(v) nc = v end })
-t4:CreateToggle({ Name = "Infinite Jump Hack", CurrentValue = false, Callback = function(v) ij = v end })
-
-RS.Heartbeat:Connect(function()
-    local h = hum()
-    if h then
-        if ws > 16 then h.WalkSpeed = ws end
-        if jp > 50 then h.JumpPower = jp end
-    end
-end)
-
-RS.Stepped:Connect(function()
-    if nc and LP.Character then
-        for _, p in ipairs(LP.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end
-    end
-end)
-
-UIS.JumpRequest:Connect(function()
-    if ij then local h = hum() if h then h:ChangeState(Enum.HumanoidStateType.Jumping) end end
-end)
-
-t4:CreateButton({ Name = "Reset Character Health", Callback = function() local h = hum() if h then h.Health = 0 end end })
-t4:CreateButton({ Name = "Toggle Zero Gravity", Callback = function() WS.Gravity = WS.Gravity == 0 and 196.2 or 0 end })
-
--- ==========================================
--- TAB 5: TELEPORT
--- ==========================================
-local t5 = Win:CreateTab("Teleport", 4483362458)
-local savedCF = nil
-t5:CreateButton({ Name = "TP to Spawn Location", Callback = function() local s = WS:FindFirstChildWhichIsA("SpawnLocation", true) if s then go(s.CFrame) end end })
-t5:CreateButton({ Name = "TP High Into Sky", Callback = function() local r = root() if r then r.CFrame = r.CFrame + Vector3.new(0, 200, 0) end end })
-t5:CreateButton({ Name = "TP Underground Safe", Callback = function() local r = root() if r then r.CFrame = r.CFrame - Vector3.new(0, 20, 0) end end })
-t5:CreateButton({ Name = "Save Current Position", Callback = function() savedCF = root() and root().CFrame end })
-t5:CreateButton({ Name = "Load Saved Position", Callback = function() if savedCF then go(savedCF) end end })
-
--- ==========================================
--- TAB 6: UTILITY & AUDIO
--- ==========================================
-local t6 = Win:CreateTab("Utility", 4483362458)
+local t4 = Win:CreateTab("Utility", 4483362458)
 local sid, svol, snd = "6023426915", 1, nil
 
-t6:CreateInput({ Name = "Roblox Audio ID Input", PlaceholderText = "Sound ID", Callback = function(t) sid = t end })
-t6:CreateSlider({ Name = "Audio Volume Control", Range = {0.1, 5}, Increment = 0.1, CurrentValue = 1, Callback = function(v) svol = v if snd then snd.Volume = v end end })
-t6:CreateToggle({ Name = "Play Sound (On/Off)", CurrentValue = false, Callback = function(s)
+t4:CreateInput({ Name = "Roblox Audio ID", PlaceholderText = "Sound ID", Callback = function(t) sid = t end })
+t4:CreateSlider({ Name = "Volume", Range = {0.1, 5}, Increment = 0.1, CurrentValue = 1, Callback = function(v) svol = v if snd then snd.Volume = v end end })
+t4:CreateToggle({ Name = "Play Sound", CurrentValue = false, Callback = function(s)
     if s then
         if snd then snd:Destroy() end
         local r = root()
@@ -257,12 +264,19 @@ t6:CreateToggle({ Name = "Play Sound (On/Off)", CurrentValue = false, Callback =
     end
 end })
 
-t6:CreateButton({ Name = "Activate Anti-AFK Protector", Callback = function()
+t4:CreateButton({ Name = "Chat Owner via Telegram (Copy Link)", Callback = function()
+    if setclipboard then
+        setclipboard("https://t.me/ManzXDzx")
+        game:GetService("StarterGui"):SetCore("SendNotification", { Title = "DARKNES HUB", Text = "Telegram link copied to clipboard!", Duration = 5 })
+    end
+end })
+
+t4:CreateButton({ Name = "Activate Anti-AFK Protector", Callback = function()
     LP.Idled:Connect(function()
         game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), WS.CurrentCamera.CFrame)
         task.wait(1)
         game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0), WS.CurrentCamera.CFrame)
     end)
 end })
-t6:CreateButton({ Name = "FPS Boost (Smooth Plastic)", Callback = function() for _, p in ipairs(WS:GetDescendants()) do if p:IsA("BasePart") then p.Material = Enum.Material.SmoothPlastic p.Reflectance = 0 end end end })
-t6:CreateButton({ Name = "Unload Hub UI Menu", Callback = function() Lib:Destroy() end })
+
+t4:CreateButton({ Name = "Unload UI Hub", Callback = function() Lib:Destroy() end })
