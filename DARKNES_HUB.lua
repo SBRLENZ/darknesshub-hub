@@ -22,10 +22,10 @@ local function loadScript(file)
     end
 end
 
--- MAP / GAME DETECTION
-if lowerName:find("rumah opa") then
+-- DETEKSI MAP LEBIH FLEKSIBEL (TERMASUK EDISI HALLOWEEN / MENGHINDAR)
+if lowerName:find("rumah opa") or lowerName:find("opah") then
     loadScript("darknesopah.lua")
-elseif lowerName:find("evade") then
+elseif lowerName:find("evade") or lowerName:find("menghindar") or lowerName:find("hlwn") then
     loadScript("darknesevade.lua")
 elseif lowerName:find("brookhaven") or lowerName:find("brook") then
     loadScript("darknesbrookhaven.lua")
