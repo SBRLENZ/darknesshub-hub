@@ -6,10 +6,10 @@ local Lgt = game:GetService("Lighting")
 local LP = Plrs.LocalPlayer
 
 local Win = Lib:CreateWindow({
-   Name = "DARKNES HUB | Animal Hospital God Mode",
+   Name = "DARKNES HUB | Animal Hospital (EN Language)",
    LoadingTitle = "DARKNES HUB ULTIMATE",
-   LoadingSubtitle = "SBRLENZ",
-   ConfigurationSaving = { Enabled = true, FolderName = "DarknesCfg", FileName = "AnimalHospitalGodMode" },
+   LoadingSubtitle = "SBRLENZ x VEXUS STYLE",
+   ConfigurationSaving = { Enabled = true, FolderName = "DarknesCfg", FileName = "AnimalHospitalEN" },
    KeySystem = false
 })
 
@@ -25,22 +25,80 @@ local function match(str, list)
     return false
 end
 
-local kwAnomali = {"anomaly", "anomali", "glitch", "lilin", "candle", "monster", "ghost", "hantu", "rare", "boss", "setrum", "shock"}
-local kwPasien  = {"patient", "pasien"}
-local kwObat    = {"med", "obat", "cure", "sembuh", "potion", "syringe", "suntik", "darah", "blood", "vitamin"}
-local kwDaftar  = {"register", "daftar", "reception", "resepsionis", "antri", "queue", "check in"}
-local kwBeli    = {"buy", "beli", "purchase", "shop", "toko", "store", "robux"}
-local kwKopi    = {"coffee", "kopi", "brew", "seduh", "espresso"}
-local kwDokter  = {"doctor", "dokter", "timer", "waktu", "shift", "arrival", "datang"}
-local kwTugas   = {"board", "papan", "foto", "photo", "computer", "komputer", "printer", "clip", "klip", "file", "dokumen"}
+local kwAnomali = {"anomaly", "glitch", "candle", "monster", "ghost", "boss", "shock", "fire"}
+local kwPasien  = {"patient", "animal", "pet"}
+local kwObat    = {"med", "medicine", "cure", "potion", "syringe", "blood", "vitamin"}
+local kwDaftar  = {"register", "reception", "queue", "check in"}
+local kwBeli    = {"buy", "purchase", "shop", "store"}
+local kwKopi    = {"coffee", "brew", "espresso"}
+local kwDokter  = {"doctor", "timer", "shift", "arrival"}
+local kwTugas   = {"board", "photo", "computer", "printer", "clip", "file"}
 
 -- ==========================================
--- TAB 1: VISUAL (ESP & TIME DOCTOR)
+-- FLOATING PING & MS WIDGET (Draggable & Toggleable)
+-- ==========================================
+local pingGui = Instance.new("ScreenGui")
+pingGui.Name = "DarknesPingGui"
+pingGui.Parent = game:GetService("CoreGui")
+pingGui.Enabled = true
+
+local pingFrame = Instance.new("Frame")
+pingFrame.Size = UDim2.new(0, 160, 0, 35)
+pingFrame.Position = UDim2.new(0, 50, 0, 50)
+pingFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+pingFrame.BorderSizePixel = 0
+pingFrame.Active = true
+pingFrame.Draggable = true
+pingFrame.Parent = pingGui
+
+local corner = Instance.new("UICorner", pingFrame)
+corner.CornerRadius = UDim.new(0, 6)
+
+local stroke = Instance.new("UIStroke", pingFrame)
+stroke.Color = Color3.fromRGB(0, 150, 255)
+stroke.Thickness = 1.5
+
+local pingLabel = Instance.new("TextLabel")
+pingLabel.Size = UDim2.new(1, 0, 1, 0)
+pingLabel.BackgroundTransparency = 1
+pingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+pingLabel.TextSize = 13
+pingLabel.Font = Enum.Font.Code
+pingLabel.Text = "Ping: ...ms | FPS: ..."
+pingLabel.Parent = pingFrame
+
+local statsConn = RS.RenderStepped:Connect(function()
+    local pVal = math.floor(LP:GetNetworkPing() * 1000 + 0.5)
+    local fVal = math.floor(1 / RS.RenderStepped:Wait())
+    pingLabel.Text = string.format("Ping: %dms | FPS: %d", pVal, fVal)
+end)
+
+-- ==========================================
+-- TAB 0: MAIN (Language Settings & Overview)
+-- ==========================================
+local tMain = Win:CreateTab("Main", 4483362458)
+tMain:CreateDropdown({
+    Name = "Select Language / Pilih Bahasa",
+    Options = {"English (Default)", "Indonesia (Translation Note)"},
+    CurrentOption = "English (Default)",
+    Callback = function(v)
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "DARKNES HUB",
+            Text = "Language set to: " .. v,
+            Duration = 3
+        })
+    end
+})
+
+tMain:CreateParagraph({ Title = "Hub Information", Content = "DARKNES HUB is fully optimized for Animal Hospital with Vexus features integrated. All texts and logs are now in English." })
+
+-- ==========================================
+-- TAB 1: VISUAL (ESP & DOCTOR TIMER)
 -- ==========================================
 local t1 = Win:CreateTab("Visual", 4483362458)
 local espAnom, espPat, espPlr = false, false, false
 
-t1:CreateToggle({ Name = "ESP Anomali (Red)", CurrentValue = false, Callback = function(v)
+t1:CreateToggle({ Name = "ESP Anomaly (Red)", CurrentValue = false, Callback = function(v)
     espAnom = v
     task.spawn(function()
         while espAnom do
@@ -59,7 +117,7 @@ t1:CreateToggle({ Name = "ESP Anomali (Red)", CurrentValue = false, Callback = f
     end)
 end })
 
-t1:CreateToggle({ Name = "ESP Patient Murni (Blue)", CurrentValue = false, Callback = function(v)
+t1:CreateToggle({ Name = "ESP Patient (Blue)", CurrentValue = false, Callback = function(v)
     espPat = v
     task.spawn(function()
         while espPat do
@@ -98,10 +156,14 @@ t1:CreateToggle({ Name = "Fullbright", CurrentValue = false, Callback = function
     Lgt.GlobalShadows = not v
 end })
 
-local docPara = t1:CreateParagraph({ Title = "Time Doctor / Waktu Dokter", Content = "Scanning timer..." })
+t1:CreateToggle({ Name = "Ping & MS Widget (On/Off)", CurrentValue = true, Callback = function(v)
+    pingGui.Enabled = v
+end })
+
+local docPara = t1:CreateParagraph({ Title = "Doctor Schedule / Shift Timer", Content = "Scanning timer..." })
 task.spawn(function()
     while true do
-        local foundText = "Menunggu jadwal dokter / Waiting..."
+        local foundText = "Waiting for doctor shift..."
         for _, obj in ipairs(WS:GetDescendants()) do
             if obj:IsA("TextLabel") and (match(obj.Name, kwDokter) or match(obj.Text, kwDokter)) then
                 if obj.Text ~= "" then
@@ -110,24 +172,23 @@ task.spawn(function()
                 end
             end
         end
-        docPara:Set({ Title = "Time Doctor / Waktu Dokter", Content = foundText })
+        docPara:Set({ Title = "Doctor Schedule / Shift Timer", Content = foundText })
         task.wait(2)
     end
 end)
 
 -- ==========================================
--- TAB 2: AUTO FARM & SMART ANOMALY SHOCKER
+-- TAB 2: AUTO FARM & VEXUS FEATURES (Sanity, Revive, Tasks)
 -- ==========================================
 local t2 = Win:CreateTab("Auto Farm", 4483362458)
-local autoServiceAll, autoBuyFlag, autoKillAnom = false, false, false
+local autoServiceAll, autoBuyFlag, infiniteSanity, autoReviveFlag = false, false, false, false
 
-t2:CreateToggle({ Name = "Auto Layanin Pasien + Auto Setrum Anomali", CurrentValue = false, Callback = function(v)
+t2:CreateToggle({ Name = "Auto Service Patients & Shock Anomaly", CurrentValue = false, Callback = function(v)
     autoServiceAll = v
     task.spawn(function()
         while autoServiceAll do
             local r = root()
             if r then
-                -- 1. Prioritas utama: Cek apakah ada anomali di sekitar/ruangan pasien
                 local anomalyFound = false
                 for _, obj in ipairs(WS:GetDescendants()) do
                     if not autoServiceAll then break end
@@ -137,7 +198,6 @@ t2:CreateToggle({ Name = "Auto Layanin Pasien + Auto Setrum Anomali", CurrentVal
                             anomalyFound = true
                             r.CFrame = target.CFrame + Vector3.new(0, 2, 0)
                             task.wait(0.2)
-                            -- Eksekusi setrum / tutup / hancurkan anomali
                             for _, pr in ipairs(obj:GetDescendants()) do
                                 if pr:IsA("ProximityPrompt") and fireproximityprompt then 
                                     fireproximityprompt(pr) 
@@ -149,7 +209,6 @@ t2:CreateToggle({ Name = "Auto Layanin Pasien + Auto Setrum Anomali", CurrentVal
                     end
                 end
 
-                -- 2. Jika tidak ada anomali, jalankan tugas normal rumah sakit (Board, Foto, Komputer, Printer, Klip)
                 if not anomalyFound then
                     for _, obj in ipairs(WS:GetDescendants()) do
                         if not autoServiceAll then break end
@@ -172,7 +231,49 @@ t2:CreateToggle({ Name = "Auto Layanin Pasien + Auto Setrum Anomali", CurrentVal
     end)
 end })
 
-t2:CreateToggle({ Name = "Auto Buy Item (Exclude Robux)", CurrentValue = false, Callback = function(v)
+-- Vexus Feature: Infinite Sanity (Mencegah Sanity Habis / Jumpscare)
+t2:CreateToggle({ Name = "Infinite Sanity (Vexus Feature)", CurrentValue = false, Callback = function(v)
+    infiniteSanity = v
+    task.spawn(function()
+        while infiniteSanity do
+            pcall(function()
+                for _, stat in ipairs(LP:GetDescendants()) do
+                    if stat.Name:lower():find("sanity") or stat.Name:lower():find("fear") or stat.Name:lower():find("kewarasan") then
+                        if stat:IsA("NumberValue") or stat:IsA("IntValue") then
+                            stat.Value = 100
+                        end
+                    end
+                end
+            end)
+            task.wait(0.5)
+        end
+    end)
+end })
+
+-- Vexus Feature: Auto Revive (Bangkit otomatis saat down/mati)
+t2:CreateToggle({ Name = "Auto Revive (Vexus Feature)", CurrentValue = false, Callback = function(v)
+    autoReviveFlag = v
+    task.spawn(function()
+        while autoReviveFlag do
+            pcall(function()
+                local h = hum()
+                if h and h.Health <= 0 then
+                    local char = LP.Character
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        local pos = char.HumanoidRootPart.CFrame
+                        LP.Character:BreakJoints()
+                        LP.CharacterAdded:Wait()
+                        task.wait(0.5)
+                        if root() then root().CFrame = pos end
+                    end
+                end
+            end)
+            task.wait(1)
+        end
+    end)
+end })
+
+t2:CreateToggle({ Name = "Auto Buy Items (Exclude Robux)", CurrentValue = false, Callback = function(v)
     autoBuyFlag = v
     task.spawn(function()
         while autoBuyFlag do
@@ -199,39 +300,92 @@ t2:CreateToggle({ Name = "Auto Buy Item (Exclude Robux)", CurrentValue = false, 
     end)
 end })
 
-t2:CreateToggle({ Name = "Auto Kill Anomali & Lilin (Standalone)", CurrentValue = false, Callback = function(v)
-    autoKillAnom = v
-    task.spawn(function()
-        while autoKillAnom do
-            local r = root()
-            if r then
-                for _, obj in ipairs(WS:GetDescendants()) do
-                    if not autoKillAnom then break end
-                    if (obj:IsA("Model") or obj:IsA("BasePart")) and match(obj.Name, kwAnomali) and not Plrs:GetPlayerFromCharacter(obj) then
-                        local target = obj:IsA("Model") and (obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")) or obj
-                        if target and target:IsA("BasePart") then
-                            r.CFrame = target.CFrame + Vector3.new(0, 2, 0)
-                            task.wait(0.25)
-                            for _, pr in ipairs(obj:GetDescendants()) do
-                                if pr:IsA("ProximityPrompt") and fireproximityprompt then fireproximityprompt(pr) end
-                            end
-                            task.wait(0.3)
-                        end
-                    end
-                end
-            end
-            task.wait(1)
-        end
-    end)
-end })
-
 -- ==========================================
--- TAB 3: EXCLUSIVE (TOGGLE INSTANT INTERACT, TP COFFEE, SAFE NOCLIP)
+-- TAB 3: EXCLUSIVE (Room TP, Spectate, NPC Scanner)
 -- ==========================================
 local t3 = Win:CreateTab("Exclusive", 4483362458)
-local instantInteractOn = false
-local safeNoclip, tpCoffeeLoop = false, false
 
+t3:CreateDropdown({
+    Name = "Teleport to Room / Lobby",
+    Options = {"Main Lobby (Respawn)", "Room 1", "Room 2", "Room 3", "Room 4", "Room 5", "Room 6", "Room 7", "Room 8 (Surgery)"},
+    CurrentOption = "Main Lobby (Respawn)",
+    Callback = function(v)
+        local r = root()
+        if not r then return end
+        if v:find("Lobby") then
+            local sp = WS:FindFirstChildWhichIsA("SpawnLocation", true)
+            if sp then r.CFrame = sp.CFrame + Vector3.new(0, 3, 0) end
+        else
+            for _, obj in ipairs(WS:GetDescendants()) do
+                if obj:IsA("BasePart") and match(obj.Name, {v:lower()}) then
+                    r.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
+                    break
+                end
+            end
+        end
+    end
+})
+
+-- Spectate Player + Next Button (Arrows)
+local spectateOn = false
+local specIndex = 1
+t3:CreateToggle({ Name = "Spectate Player (On/Off)", CurrentValue = false, Callback = function(v)
+    spectateOn = v
+    if not spectateOn then
+        workspace.CurrentCamera.CameraSubject = hum()
+    end
+end })
+
+t3:CreateButton({ Name = "Next Player to Spectate [ > ]", Callback = function()
+    if not spectateOn then return end
+    local pList = Plrs:GetPlayers()
+    specIndex = specIndex + 1
+    if specIndex > #pList then specIndex = 1 end
+    local targetPlr = pList[specIndex]
+    if targetPlr == LP then
+        specIndex = specIndex + 1
+        if specIndex > #pList then specIndex = 1 end
+        targetPlr = pList[specIndex]
+    end
+    if targetPlr and targetPlr.Character and targetPlr.Character:FindFirstChildOfClass("Humanoid") then
+        workspace.CurrentCamera.CameraSubject = targetPlr.Character:FindFirstChildOfClass("Humanoid")
+    end
+end })
+
+task.spawn(function()
+    while true do
+        if spectateOn then
+            local pList = Plrs:GetPlayers()
+            local targetPlr = pList[specIndex]
+            if targetPlr and targetPlr ~= LP and targetPlr.Character and targetPlr.Character:FindFirstChildOfClass("Humanoid") then
+                workspace.CurrentCamera.CameraSubject = targetPlr.Character:FindFirstChildOfClass("Humanoid")
+            end
+        end
+        task.wait(2)
+    end
+end)
+
+-- Auto Scanner NPC Status (None / Normal / Anomaly)
+local scanPara = t3:CreateParagraph({ Title = "Auto NPC Scanner Status", Content = "NPC Status: None" })
+task.spawn(function()
+    while true do
+        local statusText = "NPC Status: None"
+        for _, obj in ipairs(WS:GetDescendants()) do
+            if obj:IsA("Model") and not Plrs:GetPlayerFromCharacter(obj) then
+                if match(obj.Name, kwAnomali) then
+                    statusText = "NPC Status: ⚠️ ANOMALY DETECTED! (" .. obj.Name .. ")"
+                    break
+                elseif match(obj.Name, kwPasien) or obj:FindFirstChildOfClass("Humanoid") then
+                    statusText = "NPC Status: ✅ NORMAL (Patient ready)"
+                end
+            end
+        end
+        scanPara:Set({ Title = "Auto NPC Scanner Status", Content = statusText })
+        task.wait(1.5)
+    end
+end)
+
+local instantInteractOn = false
 t3:CreateToggle({ Name = "Instant Interact (On/Off Toggle)", CurrentValue = false, Callback = function(v)
     instantInteractOn = v
     task.spawn(function()
@@ -246,7 +400,8 @@ t3:CreateToggle({ Name = "Instant Interact (On/Off Toggle)", CurrentValue = fals
     end)
 end })
 
-t3:CreateToggle({ Name = "Safe Noclip (Anti Tembus Lantai)", CurrentValue = false, Callback = function(v)
+local safeNoclip, tpCoffeeLoop = false, false
+t3:CreateToggle({ Name = "Safe Noclip (Anti-Fall)", CurrentValue = false, Callback = function(v)
     safeNoclip = v
 end })
 
@@ -275,7 +430,7 @@ t3:CreateToggle({ Name = "Teleport to Coffee (TP, Take & Return)", CurrentValue 
                             for _, pr in ipairs(obj:GetDescendants()) do
                                 if pr:IsA("ProximityPrompt") then
                                     local pText = (pr.ActionText .. " " .. pr.ObjectText):lower()
-                                    if not pText:find("robux") and not pText:find("beli") then
+                                    if not pText:find("robux") and not pText:find("buy") then
                                         r.CFrame = target.CFrame + Vector3.new(0, 3, 0)
                                         task.wait(0.3)
                                         if fireproximityprompt then fireproximityprompt(pr) end
@@ -294,39 +449,15 @@ t3:CreateToggle({ Name = "Teleport to Coffee (TP, Take & Return)", CurrentValue 
     end)
 end })
 
-t3:CreateToggle({ Name = "Instant Daftar Pasien", CurrentValue = false, Callback = function(v)
-    local activeReg = v
-    task.spawn(function()
-        while activeReg do
-            local r = root()
-            if r then
-                for _, pr in ipairs(WS:GetDescendants()) do
-                    if not activeReg then break end
-                    if pr:IsA("ProximityPrompt") and (match(pr.ActionText, kwDaftar) or match(pr.ObjectText, kwDaftar)) then
-                        local part = pr.Parent:IsA("BasePart") and pr.Parent or pr.Parent:FindFirstChildWhichIsA("BasePart")
-                        if part then
-                            r.CFrame = part.CFrame + Vector3.new(0, 3, 0)
-                            task.wait(0.25)
-                            if fireproximityprompt then fireproximityprompt(pr) end
-                            task.wait(0.5)
-                        end
-                    end
-                end
-            end
-            task.wait(1.5)
-        end
-    end)
-end })
-
 -- ==========================================
 -- TAB 4: UTILITY & TELEGRAM
 -- ==========================================
 local t4 = Win:CreateTab("Utility", 4483362458)
 local sid, svol, snd = "6023426915", 1, nil
 
-t4:CreateInput({ Name = "Putar Lagu (Roblox Audio ID)", PlaceholderText = "Sound ID", Callback = function(t) sid = t end })
-t4:CreateSlider({ Name = "Volume Lagu", Range = {0.1, 5}, Increment = 0.1, CurrentValue = 1, Callback = function(v) svol = v if snd then snd.Volume = v end end })
-t4:CreateToggle({ Name = "Play / Stop Lagu", CurrentValue = false, Callback = function(s)
+t4:CreateInput({ Name = "Play Music (Roblox Audio ID)", PlaceholderText = "Sound ID", Callback = function(t) sid = t end })
+t4:CreateSlider({ Name = "Music Volume", Range = {0.1, 5}, Increment = 0.1, CurrentValue = 1, Callback = function(v) svol = v if snd then snd.Volume = v end end })
+t4:CreateToggle({ Name = "Play / Stop Music", CurrentValue = false, Callback = function(s)
     if s then
         if snd then snd:Destroy() end
         local r = root()
@@ -342,16 +473,16 @@ t4:CreateToggle({ Name = "Play / Stop Lagu", CurrentValue = false, Callback = fu
     end
 end })
 
-t4:CreateButton({ Name = "Chat Owner via Telegram (@ManzXDzx)", Callback = function'
+t4:CreateButton({ Name = "Chat Owner via Telegram (@ManzXDzx)", Callback = function()
     if setclipboard then
         setclipboard("https://t.me/ManzXDzx")
-        game:GetService("StarterGui"):SetCore("SendNotification", { Title = "DARKNES HUB", Text = "Link Telegram disalin: https://t.me/ManzXDzx", Duration = 5 })
+        game:GetService("StarterGui"):SetCore("SendNotification", { Title = "DARKNES HUB", Text = "Telegram copied: https://t.me/ManzXDzx", Duration = 5 })
     end
 end })
 
-t4:CreateButton({ Name = "Auto Skip Dokter (Dialogue)", Callback = function()
+t4:CreateButton({ Name = "Auto Skip Doctor Dialogue", Callback = function()
     for _, gui in ipairs(LP.PlayerGui:GetDescendants()) do
-        if gui:IsA("TextButton") and (gui.Text:lower():find("skip") or gui.Text:lower():find("lewati") or gui.Text:lower():find("next") or gui.Text:lower():find("lanjut")) then
+        if gui:IsA("TextButton") and (gui.Text:lower():find("skip") or gui.Text:lower():find("next") or gui.Text:lower():find("continue")) then
             if getconnections then
                 for _, conn in ipairs(getconnections(gui.MouseButton1Click)) do conn:Fire() end
             end
@@ -359,4 +490,8 @@ t4:CreateButton({ Name = "Auto Skip Dokter (Dialogue)", Callback = function()
     end
 end })
 
-t4:CreateButton({ Name = "Unload UI Hub", Callback = function() Lib:Destroy() end })
+t4:CreateButton({ Name = "Unload Hub UI", Callback = function() 
+    if pingGui then pingGui:Destroy() end
+    if statsConn then statsConn:Disconnect() end
+    Lib:Destroy() 
+end })
