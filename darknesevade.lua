@@ -1,4 +1,4 @@
---[[ DARKNES HUB - EVADE (27 PRO FEATURES) ]]
+--[[ DARKNES HUB - EVADE (CLEAN PRO EDITION) ]]
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Players = game:GetService("Players")
@@ -8,13 +8,13 @@ local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
 local Window = Rayfield:CreateWindow({
-   Name = "DARKNES HUB | Evade (27 Features)",
+   Name = "DARKNES HUB | Evade",
    LoadingTitle = "DARKNES HUB",
    LoadingSubtitle = "by SBRLENZ",
    ConfigurationSaving = {
       Enabled = true,
       FolderName = "DarknesHubConfig",
-      FileName = "EvadeConfig27"
+      FileName = "EvadeConfigClean"
    },
    KeySystem = false
 })
@@ -41,12 +41,11 @@ local MainTab = Window:CreateTab("Main", 4483362458)
 
 MainTab:CreateParagraph({
    Title = "Welcome, " .. LocalPlayer.Name .. "!",
-   Content = "Darknes Hub Evade Edition loaded with 27 custom features.\n\nJoin Discord:\nhttps://discord.gg/jzDxbbJhy"
+   Content = "Darknes Hub Evade Edition loaded successfully.\n\nJoin Discord:\nhttps://discord.gg/jzDxbbJhy"
 })
 
--- Fitur 1
 MainTab:CreateButton({
-   Name = "1. Copy Discord Link",
+   Name = "Copy Discord Link",
    Callback = function()
        if setclipboard then
            setclipboard("https://discord.gg/jzDxbbJhy")
@@ -55,21 +54,17 @@ MainTab:CreateButton({
    end,
 })
 
--- Fitur 2
 MainTab:CreateButton({
-   Name = "2. Rejoin Server",
+   Name = "Rejoin Server",
    Callback = function()
        game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
    end,
 })
 
--- Fitur 3
 MainTab:CreateButton({
-   Name = "3. Server Hop (Find New Lobby)",
+   Name = "Server Hop",
    Callback = function()
-       local ts = game:GetService("TeleportService")
-       local p = game:GetService("Players").LocalPlayer
-       ts:Teleport(game.PlaceId, p)
+       game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
    end,
 })
 
@@ -81,9 +76,8 @@ VisualTab:CreateSection("ESP Suite")
 
 local espNextbotActive = false
 local nextbotHls = {}
--- Fitur 4
 VisualTab:CreateToggle({
-   Name = "4. ESP Nextbots / Enemy",
+   Name = "ESP Nextbots / Enemy",
    CurrentValue = false,
    Callback = function(v)
        espNextbotActive = v
@@ -114,9 +108,8 @@ VisualTab:CreateToggle({
 
 local espPlayersActive = false
 local playerHls = {}
--- Fitur 5
 VisualTab:CreateToggle({
-   Name = "5. ESP Players / Teammates",
+   Name = "ESP Players / Teammates",
    CurrentValue = false,
    Callback = function(v)
        espPlayersActive = v
@@ -143,9 +136,8 @@ VisualTab:CreateToggle({
    end,
 })
 
--- Fitur 6
 VisualTab:CreateToggle({
-   Name = "6. Fullbright (Remove Darkness)",
+   Name = "Fullbright",
    CurrentValue = false,
    Callback = function(v)
        if v then
@@ -158,9 +150,8 @@ VisualTab:CreateToggle({
    end,
 })
 
--- Fitur 7
 VisualTab:CreateToggle({
-   Name = "7. Remove Fog",
+   Name = "Remove Fog",
    CurrentValue = false,
    Callback = function(v)
        if v then
@@ -172,9 +163,8 @@ VisualTab:CreateToggle({
    end,
 })
 
--- Fitur 8
 VisualTab:CreateToggle({
-   Name = "8. Camera FOV Changer (120)",
+   Name = "Camera FOV Changer",
    CurrentValue = false,
    Callback = function(v)
        workspace.CurrentCamera.FieldOfView = v and 120 or 70
@@ -188,9 +178,8 @@ local PlayerTab = Window:CreateTab("Player", 4483362458)
 PlayerTab:CreateSection("Movement Tweaks")
 
 local targetSpeed = 16
--- Fitur 9
 PlayerTab:CreateSlider({
-   Name = "9. WalkSpeed Boost",
+   Name = "WalkSpeed Boost",
    Range = {16, 120},
    Increment = 1,
    Suffix = " Spd",
@@ -206,9 +195,8 @@ RunService.Heartbeat:Connect(function()
 end)
 
 local targetJump = 50
--- Fitur 10
 PlayerTab:CreateSlider({
-   Name = "10. JumpPower Boost",
+   Name = "JumpPower Boost",
    Range = {50, 200},
    Increment = 5,
    Suffix = " JP",
@@ -223,7 +211,6 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- Fitur 11
 local noclipActive = false
 RunService.Stepped:Connect(function()
     if noclipActive and LocalPlayer.Character then
@@ -233,15 +220,14 @@ RunService.Stepped:Connect(function()
     end
 end)
 PlayerTab:CreateToggle({
-   Name = "11. Noclip (Walk Through Walls)",
+   Name = "Noclip",
    CurrentValue = false,
    Callback = function(v) noclipActive = v end,
 })
 
--- Fitur 12
 local bhopActive = false
 PlayerTab:CreateToggle({
-   Name = "12. Auto Bunny Hop (BHOP)",
+   Name = "Auto Bunny Hop",
    CurrentValue = false,
    Callback = function(v)
        bhopActive = v
@@ -257,7 +243,6 @@ PlayerTab:CreateToggle({
    end,
 })
 
--- Fitur 13
 local infJump = false
 game:GetService("UserInputService").JumpRequest:Connect(function()
     if infJump and LocalPlayer.Character then
@@ -266,7 +251,7 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 PlayerTab:CreateToggle({
-   Name = "13. Infinite Jump",
+   Name = "Infinite Jump",
    CurrentValue = false,
    Callback = function(v) infJump = v end,
 })
@@ -277,9 +262,8 @@ PlayerTab:CreateToggle({
 local TeleportTab = Window:CreateTab("Teleport", 4483362458)
 TeleportTab:CreateSection("Quick Teleports")
 
--- Fitur 14
 TeleportTab:CreateButton({
-   Name = "14. TP to Random Player",
+   Name = "TP to Random Player",
    Callback = function()
        local players = Players:GetPlayers()
        for _, p in ipairs(players) do
@@ -291,18 +275,16 @@ TeleportTab:CreateButton({
    end,
 })
 
--- Fitur 15
 TeleportTab:CreateButton({
-   Name = "15. TP to Spawn / Lobby",
+   Name = "TP to Spawn",
    Callback = function()
        local spawn = Workspace:FindFirstChildWhichIsA("SpawnLocation", true)
        if spawn then tpTo(spawn.CFrame) end
    end,
 })
 
--- Fitur 16
 TeleportTab:CreateButton({
-   Name = "16. TP to Sky (Safe High Position)",
+   Name = "TP to Sky",
    Callback = function()
        local root = getRoot()
        if root then root.CFrame = root.CFrame + Vector3.new(0, 150, 0) end
@@ -315,9 +297,8 @@ TeleportTab:CreateButton({
 local UtilityTab = Window:CreateTab("Utility", 4483362458)
 UtilityTab:CreateSection("Quality of Life")
 
--- Fitur 17
 UtilityTab:CreateButton({
-   Name = "17. Respawn / Reset Character",
+   Name = "Respawn Character",
    Callback = function()
        local char = LocalPlayer.Character
        if char and char:FindFirstChildOfClass("Humanoid") then
@@ -326,10 +307,9 @@ UtilityTab:CreateButton({
    end,
 })
 
--- Fitur 18
 local autoRevive = false
 UtilityTab:CreateToggle({
-   Name = "18. Auto Revive Teammates (Nearby)",
+   Name = "Auto Revive Teammates",
    CurrentValue = false,
    Callback = function(v)
        autoRevive = v
@@ -357,9 +337,8 @@ UtilityTab:CreateToggle({
    end,
 })
 
--- Fitur 19
 UtilityTab:CreateButton({
-   Name = "19. Remove Blur Effects",
+   Name = "Remove Blur Effects",
    Callback = function()
        for _, obj in ipairs(Lighting:GetDescendants()) do
            if obj:IsA("BlurEffect") or obj:IsA("ColorCorrectionEffect") then obj:Destroy() end
@@ -367,9 +346,8 @@ UtilityTab:CreateButton({
    end,
 })
 
--- Fitur 20
 UtilityTab:CreateButton({
-   Name = "20. Anti-AFK (Bypass Kick)",
+   Name = "Anti-AFK",
    Callback = function()
        local vu = game:GetService("VirtualUser")
        LocalPlayer.Idled:Connect(function()
@@ -382,15 +360,14 @@ UtilityTab:CreateButton({
 })
 
 -- ==========================================
--- TAB 6: EXCLUSIVE (GODMODE & OTHERS)
+-- TAB 6: EXCLUSIVE
 -- ==========================================
 local ExclusiveTab = Window:CreateTab("Exclusive", 4483362458)
 ExclusiveTab:CreateSection("Overpowered Hacks")
 
--- Fitur 21: Godmode / Auto-Dodge
 local smartGodmode = false
 ExclusiveTab:CreateToggle({
-   Name = "21. Smart Godmode (Auto-Dodge Nextbots)",
+   Name = "Smart Godmode",
    CurrentValue = false,
    Callback = function(v)
        smartGodmode = v
@@ -418,13 +395,10 @@ ExclusiveTab:CreateToggle({
    end,
 })
 
--- Fitur 22
-local invisActive = false
 ExclusiveTab:CreateToggle({
-   Name = "22. Invisible (Hide Character)",
+   Name = "Invisible Body",
    CurrentValue = false,
    Callback = function(v)
-       invisActive = v
        local char = LocalPlayer.Character
        if char then
            for _, part in ipairs(char:GetDescendants()) do
@@ -436,62 +410,17 @@ ExclusiveTab:CreateToggle({
    end,
 })
 
--- Fitur 23
 ExclusiveTab:CreateButton({
-   Name = "23. Speed Hack Burst (+50 Velocity)",
+   Name = "Speed Burst",
    Callback = function()
        local root = getRoot()
-       if root then
-           root.Velocity = root.CFrame.LookVector * 150
-       end
+       if root then root.Velocity = root.CFrame.LookVector * 150 end
    end,
 })
 
--- Fitur 24
 ExclusiveTab:CreateButton({
-   Name = "24. Instant Spin / 360 Trick",
-   Callback = function()
-       local root = getRoot()
-       if root then
-           for i = 1, 10 do
-               root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(36), 0)
-               task.wait(0.01)
-           end
-       end
-   end,
-})
-
--- Fitur 25
-ExclusiveTab:CreateToggle({
-   Name = "25. Ultra High Performance (Low GFX)",
-   CurrentValue = false,
-   Callback = function(v)
-       if v then
-           settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-           for _, p in ipairs(Workspace:GetDescendants()) do
-               if p:IsA("BasePart") then p.Material = Enum.Material.SmoothPlastic p.Reflectance = 0 end
-           end
-       end
-   end,
-})
-
--- Fitur 26
-ExclusiveTab:CreateButton({
-   Name = "26. Zero Gravity Mode",
+   Name = "Zero Gravity",
    Callback = function()
        Workspace.Gravity = Workspace.Gravity == 0 and 196.2 or 0
-       Rayfield:Notify({Title = "Gravity", Content = "Toggled Gravity to " .. Workspace.Gravity, Duration = 2})
-   end,
-})
-
--- Fitur 27
-ExclusiveTab:CreateButton({
-   Name = "27. Emergency Teleport to Sky Safe",
-   Callback = function()
-       local root = getRoot()
-       if root then
-           root.CFrame = CFrame.new(root.Position + Vector3.new(0, 300, 0))
-           Rayfield:Notify({Title = "Emergency", Content = "Safely teleported high into the sky!", Duration = 3})
-       end
    end,
 })
