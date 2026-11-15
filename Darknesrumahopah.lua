@@ -10,8 +10,8 @@ local LP = Players.LocalPlayer
 
 local Window = Rayfield:CreateWindow({
     Name = "DARKNES HUB | Rumah Opah",
-    LoadingTitle = "DARKNES HUB ULTIMATE",
-    LoadingSubtitle = "Malam Bersama Opah - Full Suite",
+    LoadingTitle = "DARKNES HUB",
+    LoadingSubtitle = "Malam Bersama Opah",
     Theme = "Default",
     ConfigurationSaving = {
         Enabled = true,
@@ -59,7 +59,7 @@ local kwSecret = {"secret", "attic", "loteng", "rahasia", "ending", "altar", "ri
 local function findParts(keywords)
     local found = {}
     for _, obj in ipairs(Workspace:GetDescendants()) do
-        if obj:IsA("BasePart") or obj:IsA("Model") then
+        if obj:IsA("BasePart") yor obj:IsA("Model") then
             if matchName(obj.Name, keywords) then
                 local part = obj
                 if obj:IsA("Model") then
