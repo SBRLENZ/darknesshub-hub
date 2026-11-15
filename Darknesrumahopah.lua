@@ -9,8 +9,8 @@ local LP = Players.LocalPlayer
 
 local Window = Rayfield:CreateWindow({
     Name = "DARKNES HUB | Rumah Opah",
-    LoadingTitle = "DARKNES HUB ULTIMATE",
-    LoadingSubtitle = "Rumah Opah Full Features Edition",
+    LoadingTitle = "DARKNES HUB",
+    LoadingSubtitle = "Rumah Opah",
     Theme = "Default",
     ConfigurationSaving = {
         Enabled = true,
@@ -124,7 +124,7 @@ end
 -- TAB 1: MAIN & INFO
 TabMain:CreateSection("Informasi Hub")
 TabMain:CreateLabel("Halo @" .. (LP.DisplayName or LP.Name))
-TabMain:CreateLabel("DARKNES HUB - Rumah Opah Ultimate Edition")
+TabMain:CreateLabel("DARKNES HUB")
 TabMain:CreateButton({
     Name = "Copy Link Discord Komunitas",
     Callback = function()
@@ -137,7 +137,7 @@ TabMain:CreateButton({
 TabVisual:CreateSection("ESP Options")
 
 TabVisual:CreateToggle({
-    Name = "ESP Opah / Monster",
+    Name = "ESP Opah",
     CurrentValue = false,
     Callback = function(v)
         if v then
@@ -318,12 +318,12 @@ TabTP:CreateButton({
 })
 
 -- TAB 5: EKSKLUSIF
-TabEx:CreateSection("Eksklusif Fitur Opah")
+TabEx:CreateSection("Eksklusif")
 
 local warnActive = false
 local warnConn
 TabEx:CreateToggle({
-    Name = "Indicator Warn (Deteksi Opah Dekat)",
+    Name = "Indicator Warn",
     CurrentValue = false,
     Callback = function(v)
         warnActive = v
@@ -345,7 +345,7 @@ TabEx:CreateToggle({
 local autoRunActive = false
 local autoRunConn
 TabEx:CreateToggle({
-    Name = "Auto Run (Kabur ke Safe saat Opah Dekat)",
+    Name = "Auto Run",
     CurrentValue = false,
     Callback = function(v)
         autoRunActive = v
@@ -367,7 +367,7 @@ TabEx:CreateToggle({
 
 local invisActive = false
 TabEx:CreateToggle({
-    Name = "Invisible (Hilangkan Transparansi Karakter)",
+    Name = "Invisible",
     CurrentValue = false,
     Callback = function(v)
         invisActive = v
@@ -384,7 +384,7 @@ TabEx:CreateToggle({
 local autoDriveActive = false
 local driveConn
 TabEx:CreateToggle({
-    Name = "Auto Drive / Vehicle Control",
+    Name = "Auto Drive",
     CurrentValue = false,
     Callback = function(v)
         autoDriveActive = v
@@ -413,7 +413,7 @@ TabEx:CreateToggle({
 local infStaminaActive = false
 local staminaConn
 TabEx:CreateToggle({
-    Name = "Infinity Stamina / No Fatigue",
+    Name = "Infinity Stamina",
     CurrentValue = false,
     Callback = function(v)
         infStaminaActive = v
