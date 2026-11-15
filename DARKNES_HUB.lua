@@ -1,4 +1,9 @@
---[[ DARKNES HUB - MAIN LOADER ]]
+--[[ DARKNES HUB - MAIN LOADER FIXED ]]
+local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
+
 local url = "https://raw.githubusercontent.com/SBRLENZ/darknesshub-hub/main/"
 local bypass = "?v=" .. tostring(tick())
 
@@ -12,40 +17,39 @@ end
 local GameName = string.lower(getGame())
 local PlaceId = game.PlaceId
 
-local function Load(scr)
-    local ok, err = pcall(function()
-        loadstring(game:HttpGet(url .. scr .. bypass))()
+local function LoadScript(filename)
+    local fullUrl = url .. filename .. bypass
+    print("[DARKNES HUB] Memuat: " .. fullUrl)
+    
+    local success, result = pcall(function()
+        return game:HttpGet(fullUrl)
     end)
-    if not ok then
-        warn("DARKNES HUB Error loading " .. scr .. ": " .. tostring(err))
+    
+    if success and result then
+        local fn, err = loadstring(result)
+        if fn then
+            local runSuccess, runErr = pcall(fn)
+            if not runSuccess then
+                warn("[DARKNES HUB] Error eksekusi " .. filename .. ": " .. tostring(runErr))
+            end
+        else
+            warn("[DARKNES HUB] Error loadstring " .. filename .. ": " .. tostring(err))
+        end
+    else
+        warn("[DARKNES HUB] Gagal HttpGet file: " .. filename)
     end
 end
 
--- ==========================================
--- DETEKSI MAP (Prioritas PlaceId / Nama)
--- ==========================================
-
--- 1. Animal Hospital
+-- Deteksi Game
 if GameName:find("animal") or GameName:find("hospital") then
-    Load("darknesanimalhospital.lua")
-
--- 2. Malam Bersama Opah / Rumah Opah
+    LoadScript("darknesanimalhospital.lua")
 elseif PlaceId == 750114916 or GameName:find("opah") or GameName:find("malam") or GameName:find("rumah") then
-    Load("Darknesrumahopah.lua")
-
--- 3. Brookhaven RP
+    LoadScript("Darknesrumahopah.lua")
 elseif GameName:find("brookhaven") or GameName:find("brook") then
-    Load("colihub.lua")
-
--- 4. Evade
+    LoadScript("colihub.lua")
 elseif GameName:find("evade") then
-    Load("DarknesEvade.lua")
-
--- 5. Fallback (Map tidak dikenal)
+    LoadScript("DarknesEvade.lua")
 else
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "DARKNES HUB",
-        Text = "Game belum didukung: " .. GameName,
-        Duration = 4
-    })
+    -- Fallback paksa load Rumah Opah jika test di game tersebut
+    LoadScript("Darknesrumahopah.lua")
 end
