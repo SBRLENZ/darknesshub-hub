@@ -5,28 +5,31 @@ local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local CoreGui = game:GetService("CoreGui")
+local VirtualUser = game:GetService("VirtualUser")
 local LP = Players.LocalPlayer
 
 local Window = Rayfield:CreateWindow({
     Name = "DARKNES HUB | Rumah Opah",
-    LoadingTitle = "DARKNES HUB",
-    LoadingSubtitle = "Rumah Opah",
+    LoadingTitle = "DARKNES HUB ULTIMATE",
+    LoadingSubtitle = "Malam Bersama Opah - Full Suite",
     Theme = "Default",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "DarknesHub",
-        FileName = "RumahOpahConfig"
+        FileName = "RumahOpahV2"
     },
     KeySystem = false
 })
 
-local TabMain = Window:CreateTab("Main & Info", 4483362458)
+-- TABS
+local TabMain = Window:CreateTab("Main & Lobby", 4483362458)
+local TabEnding = Window:CreateTab("Secret Ending", 4483362458)
+local TabFarm = Window:CreateTab("Auto & Bring", 4483362458)
 local TabVisual = Window:CreateTab("Visual & ESP", 4483362458)
-local TabFarm = Window:CreateTab("Farming & Bring", 4483362458)
-local TabTP = Window:CreateTab("Teleport", 4483362458)
-local TabEx = Window:CreateTab("Eksklusif", 4483362458)
+local TabEx = Window:CreateTab("Protection & Excl", 4483362458)
 local TabUtil = Window:CreateTab("Utility & Music", 4483362458)
 
+-- HELPERS
 local function getRoot()
     local c = LP.Character
     return c and c:FindFirstChild("HumanoidRootPart")
@@ -48,10 +51,10 @@ end
 
 local kwKey = {"key", "kunci"}
 local kwFlip = {"flip", "flop", "sandal", "shoe", "slippers", "sendal"}
-local kwCode = {"code", "password", "sandi", "pin", "kode"}
+local kwCode = {"code", "password", "sandi", "pin", "kode", "note", "kertas"}
 local kwLemari = {"lemari", "cabinet", "closet", "wardrobe", "hide", "cupboard"}
 local kwOpah = {"opah", "granny", "nenek", "npc", "monster"}
-local kwMotor = {"motor", "bike", "motorcycle", "scooter", "vehicle", "seat"}
+local kwSecret = {"secret", "attic", "loteng", "rahasia", "ending", "altar", "ritual", "basement", "bawah"}
 
 local function findParts(keywords)
     local found = {}
@@ -95,82 +98,296 @@ local function tpTo(cf)
     if r then r.CFrame = cf end
 end
 
--- ESP System via Rayfield Toggles
-local espFolder = Instance.new("Folder")
-espFolder.Name = "DarknesRayfieldESP"
-espFolder.Parent = CoreGui
-
-local function clearESP()
-    for _, obj in ipairs(CoreGui:GetDescendants()) do
-        if obj.Name == "DarknesESP_HL" then obj:Destroy() end
+local function triggerAllPrompts(parentObj)
+    for _, d in ipairs(parentObj:GetDescendants()) do
+        if d:IsA("ProximityPrompt") then
+            pcall(function() fireproximityprompt(d) end)
+        end
     end
 end
 
-local function applyESP(keywords, color)
+-- ==========================================
+-- TAB 1: MAIN & LOBBY
+-- ==========================================
+TabMain:CreateSection("Hub Information")
+TabMain:CreateLabel("User: @" .. (LP.DisplayName or LP.Name))
+TabMain:CreateButton({
+    Name = "Copy Discord Community",
+    Callback = function()
+        pcall(function() setclipboard("https://discord.gg/jzDxbbJhy") end)
+        Rayfield:Notify({Title = "Discord", Content = "Link Discord disalin ke clipboard.", Duration = 2})
+    end
+})
+
+TabMain:CreateSection("Lobby & Gacha Utilities")
+
+TabMain:CreateButton({
+    Name = "Teleport to Lobby / Spawn",
+    Callback = function()
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("SpawnLocation") then
+                tpTo(obj.CFrame + Vector3.new(0, 3, 0))
+                Rayfield:Notify({Title = "Teleport", Content = "Berhasil kembali ke Spawn.", Duration = 2})
+                return
+            end
+        end
+    end
+})
+
+TabMain:CreateButton({
+    Name = "Auto Trigger Gacha / Spin Prompts",
+    Callback = function()
+        local triggered = 0
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if matchName(obj.Name, {"gacha", "spin", "roll", "skill", "crate", "shop"}) then
+                triggerAllPrompts(obj)
+                triggered = triggered + 1
+            end
+        end
+        Rayfield:Notify({Title = "Lobby Gacha", Content = "Mencoba memicu " .. tostring(triggered) .. " objek gacha.", Duration = 2})
+    end
+})
+
+-- ==========================================
+-- TAB 2: SECRET ENDING HELPER
+-- ==========================================
+TabEnding:CreateSection("Secret Ending Automation")
+
+TabEnding:CreateButton({
+    Name = "Scan & Notify Passcode / Clues",
+    Callback = function()
+        local foundCodes = {}
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("SurfaceGui") or obj:IsA("BillboardGui") then
+                for _, lbl in ipairs(obj:GetDescendants()) do
+                    if lbl:IsA("TextLabel") and lbl.Text:match("%d%d%d+") then
+                        table.insert(foundCodes, lbl.Text)
+                    end
+                end
+            end
+        end
+        if #foundCodes > 0 then
+            Rayfield:Notify({Title = "Code Terdeteksi", Content = "Ditemukan angka: " .. table.concat(foundCodes, ", "), Duration = 6})
+        else
+            Rayfield:Notify({Title = "Code Scanner", Content = "Belum ada angka kode terlihat di layar/kertas.", Duration = 3})
+        end
+    end
+})
+
+TabEnding:CreateButton({
+    Name = "Auto Input / Trigger Keypad & Locks",
+    Callback = function()
+        local count = 0
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if matchName(obj.Name, {"keypad", "padlock", "lock", "brankas", "safe", "door", "pintu", "passcode"}) then
+                triggerAllPrompts(obj)
+                count = count + 1
+            end
+        end
+        Rayfield:Notify({Title = "Passcode Helper", Content = "Memicu interaksi pada " .. tostring(count) .. " kunci/keypad.", Duration = 2})
+    end
+})
+
+TabEnding:CreateButton({
+    Name = "Teleport to Secret Area / Attic",
+    Callback = function()
+        local parts = findParts(kwSecret)
+        if #parts > 0 then
+            tpTo(parts[1].CFrame + Vector3.new(0, 3, 0))
+            Rayfield:Notify({Title = "Secret Ending", Content = "Teleport ke area rahasia: " .. parts[1].Name, Duration = 3})
+        else
+            Rayfield:Notify({Title = "Secret Ending", Content = "Area rahasia belum ter-load di map.", Duration = 3})
+        end
+    end
+})
+
+TabEnding:CreateButton({
+    Name = "Collect All Secret Ritual Items",
+    Callback = function()
+        local parts = findParts({"ritual", "boneka", "doll", "foto", "photo", "diary", "buku", "book", "artifact", "secret"})
+        task.spawn(function()
+            local r = getRoot()
+            if not r then return end
+            local orig = r.CFrame
+            for _, p in ipairs(parts) do
+                r.CFrame = p.CFrame + Vector3.new(0, 2, 0)
+                task.wait(0.2)
+                pcall(function()
+                    firetouchinterest(r, p, 0)
+                    firetouchinterest(r, p, 1)
+                end)
+                if p.Parent then triggerAllPrompts(p.Parent) end
+                task.wait(0.15)
+            end
+            r.CFrame = orig
+            Rayfield:Notify({Title = "Secret Ending", Content = "Selesai mengecek " .. tostring(#parts) .. " item rahasia.", Duration = 3})
+        end)
+    end
+})
+
+-- ==========================================
+-- TAB 3: AUTO FARM & BRING
+-- ==========================================
+TabFarm:CreateSection("Auto Collect Items")
+
+TabFarm:CreateButton({
+    Name = "Auto Collect All Kunci (Keys)",
+    Callback = function()
+        local parts = findParts(kwKey)
+        task.spawn(function()
+            local r = getRoot()
+            if not r then return end
+            local orig = r.CFrame
+            for _, p in ipairs(parts) do
+                r.CFrame = p.CFrame + Vector3.new(0, 2, 0)
+                task.wait(0.2)
+                pcall(function()
+                    firetouchinterest(r, p, 0)
+                    firetouchinterest(r, p, 1)
+                end)
+                if p.Parent then triggerAllPrompts(p.Parent) end
+                task.wait(0.15)
+            end
+            r.CFrame = orig
+            Rayfield:Notify({Title = "Auto Collect", Content = "Selesai mengumpulkan Kunci.", Duration = 2})
+        end)
+    end
+})
+
+TabFarm:CreateButton({
+    Name = "Auto Collect All Flip Flops",
+    Callback = function()
+        local parts = findParts(kwFlip)
+        task.spawn(function()
+            local r = getRoot()
+            if not r then return end
+            local orig = r.CFrame
+            for _, p in ipairs(parts) do
+                r.CFrame = p.CFrame + Vector3.new(0, 2, 0)
+                task.wait(0.2)
+                pcall(function()
+                    firetouchinterest(r, p, 0)
+                    firetouchinterest(r, p, 1)
+                end)
+                task.wait(0.1)
+            end
+            r.CFrame = orig
+            Rayfield:Notify({Title = "Auto Collect", Content = "Selesai mengumpulkan Flip Flop.", Duration = 2})
+        end)
+    end
+})
+
+TabFarm:CreateSection("Direct Teleports")
+
+TabFarm:CreateButton({
+    Name = "Teleport to Code / Note",
+    Callback = function()
+        local parts = findParts(kwCode)
+        if #parts > 0 then tpTo(parts[1].CFrame + Vector3.new(0, 3, 0)) end
+    end
+})
+
+TabFarm:CreateButton({
+    Name = "Teleport to Dapur",
+    Callback = function()
+        local parts = findParts({"dapur", "kitchen", "cook"})
+        if #parts > 0 then tpTo(parts[1].CFrame + Vector3.new(0, 3, 0)) end
+    end
+})
+
+TabFarm:CreateButton({
+    Name = "Teleport to Pintu Utama",
+    Callback = function()
+        local parts = findParts({"pintu", "door", "front", "entrance"})
+        if #parts > 0 then tpTo(parts[1].CFrame + Vector3.new(0, 0, 4)) end
+    end
+})
+
+-- ==========================================
+-- TAB 4: VISUAL & ESP
+-- ==========================================
+local function clearESPByTag(tag)
     for _, obj in ipairs(Workspace:GetDescendants()) do
-        if (obj:IsA("BasePart") or obj:IsA("Model")) and matchName(obj.Name, keywords) then
-            local target = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
-            if target and not target:FindFirstChild("DarknesESP_HL") then
-                local h = Instance.new("Highlight", target)
-                h.Name = "DarknesESP_HL"
-                h.FillColor = color
-                h.OutlineColor = Color3.fromRGB(255, 255, 255)
-                h.FillTransparency = 0.4
+        if obj.Name == tag then obj:Destroy() end
+    end
+end
+
+local function applyESPByTag(keywords, color, tag)
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if (obj:IsA("BasePart") or obj:IsA("Model")) and not Players:GetPlayerFromCharacter(obj) then
+            if matchName(obj.Name, keywords) then
+                local target = obj:IsA("Model") and obj or obj
+                if target and not target:FindFirstChild(tag) then
+                    local h = Instance.new("Highlight", target)
+                    h.Name = tag
+                    h.FillColor = color
+                    h.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    h.FillTransparency = 0.4
+                end
             end
         end
     end
 end
 
--- TAB 1: MAIN & INFO
-TabMain:CreateSection("Informasi Hub")
-TabMain:CreateLabel("Halo @" .. (LP.DisplayName or LP.Name))
-TabMain:CreateLabel("DARKNES HUB")
-TabMain:CreateButton({
-    Name = "Copy Link Discord Komunitas",
-    Callback = function()
-        pcall(function() setclipboard("https://discord.gg/jzDxbbJhy") end)
-        Rayfield:Notify({Title = "Discord", Content = "Link Discord berhasil disalin.", Duration = 2})
-    end
-})
+TabVisual:CreateSection("Entity & Item ESP")
 
--- TAB 2: VISUAL & ESP
-TabVisual:CreateSection("ESP Options")
-
+local espOpahOn = false
 TabVisual:CreateToggle({
-    Name = "ESP Opah",
+    Name = "ESP Opah / Monster",
     CurrentValue = false,
     Callback = function(v)
-        if v then
-            task.spawn(function()
-                while v do
-                    local model, _ = findOpah()
-                    if model and not model:FindFirstChild("DarknesESP_HL") then
-                        local h = Instance.new("Highlight", model)
-                        h.Name = "DarknesESP_HL"
-                        h.FillColor = Color3.fromRGB(255, 40, 40)
-                    end
-                    task.wait(2)
+        espOpahOn = v
+        if not v then clearESPByTag("_ESPOpah") return end
+        task.spawn(function()
+            while espOpahOn do
+                local model, _ = findOpah()
+                if model and not model:FindFirstChild("_ESPOpah") then
+                    local h = Instance.new("Highlight", model)
+                    h.Name = "_ESPOpah"
+                    h.FillColor = Color3.fromRGB(255, 35, 35)
+                    h.OutlineColor = Color3.fromRGB(255, 255, 255)
                 end
-            end)
-        else
-            clearESP()
-        end
+                task.wait(1.5)
+            end
+        end)
+    end
+})
+
+local espPlrOn = false
+TabVisual:CreateToggle({
+    Name = "ESP Players",
+    CurrentValue = false,
+    Callback = function(v)
+        espPlrOn = v
+        if not v then clearESPByTag("_ESPPlayer") return end
+        task.spawn(function()
+            while espPlrOn do
+                for _, p in ipairs(Players:GetPlayers()) do
+                    if p ~= LP and p.Character and not p.Character:FindFirstChild("_ESPPlayer") then
+                        local h = Instance.new("Highlight", p.Character)
+                        h.Name = "_ESPPlayer"
+                        h.FillColor = Color3.fromRGB(0, 200, 255)
+                    end
+                end
+                task.wait(2)
+            end
+        end)
     end
 })
 
 TabVisual:CreateToggle({
-    Name = "ESP Kunci",
+    Name = "ESP Kunci (Keys)",
     CurrentValue = false,
     Callback = function(v)
-        if v then applyESP(kwKey, Color3.fromRGB(255, 220, 50)) else clearESP() end
+        if v then applyESPByTag(kwKey, Color3.fromRGB(255, 220, 50), "_ESPKey") else clearESPByTag("_ESPKey") end
     end
 })
 
 TabVisual:CreateToggle({
-    Name = "ESP Code",
+    Name = "ESP Code / Notes",
     CurrentValue = false,
     Callback = function(v)
-        if v then applyESP(kwCode, Color3.fromRGB(100, 255, 140)) else clearESP() end
+        if v then applyESPByTag(kwCode, Color3.fromRGB(80, 255, 120), "_ESPCode") else clearESPByTag("_ESPCode") end
     end
 })
 
@@ -178,7 +395,7 @@ TabVisual:CreateToggle({
     Name = "ESP Flip Flop",
     CurrentValue = false,
     Callback = function(v)
-        if v then applyESP(kwFlip, Color3.fromRGB(255, 140, 80)) else clearESP() end
+        if v then applyESPByTag(kwFlip, Color3.fromRGB(255, 140, 60), "_ESPFlip") else clearESPByTag("_ESPFlip") end
     end
 })
 
@@ -186,11 +403,11 @@ TabVisual:CreateToggle({
     Name = "ESP Lemari Hide",
     CurrentValue = false,
     Callback = function(v)
-        if v then applyESP(kwLemari, Color3.fromRGB(160, 120, 255)) else clearESP() end
+        if v then applyESPByTag(kwLemari, Color3.fromRGB(170, 110, 255), "_ESPLemari") else clearESPByTag("_ESPLemari") end
     end
 })
 
-TabVisual:CreateSection("Environment")
+TabVisual:CreateSection("Lighting")
 
 local origBrightness = Lighting.Brightness
 local origShadows = Lighting.GlobalShadows
@@ -215,149 +432,115 @@ TabVisual:CreateToggle({
     Name = "No Fog",
     CurrentValue = false,
     Callback = function(v)
+        Lighting.FogEnd = v and 100000 or (origFogEnd or 1000)
+    end
+})
+
+-- ==========================================
+-- TAB 5: PROTECTION & EXCLUSIVE
+-- ==========================================
+TabEx:CreateSection("Sprint & Movement")
+
+local staminaConn
+TabEx:CreateToggle({
+    Name = "Infinity Stamina",
+    CurrentValue = false,
+    Callback = function(v)
+        if staminaConn then staminaConn:Disconnect() staminaConn = nil end
         if v then
-            Lighting.FogEnd = 100000
-        else
-            Lighting.FogEnd = origFogEnd or 1000
-        end
-    end
-})
-
--- TAB 3: FARMING & BRING
-TabFarm:CreateSection("Auto Collect & Bring")
-
-TabFarm:CreateButton({
-    Name = "Auto Collect All Flip Flop",
-    Callback = function()
-        local parts = findParts(kwFlip)
-        task.spawn(function()
-            for _, p in ipairs(parts) do
-                local r = getRoot()
-                if r then
-                    r.CFrame = p.CFrame + Vector3.new(0, 3, 0)
-                    task.wait(0.2)
-                    pcall(function()
-                        firetouchinterest(r, p, 0)
-                        firetouchinterest(r, p, 1)
-                    end)
-                end
-                task.wait(0.1)
-            end
-            Rayfield:Notify({Title = "Farming", Content = "Selesai mengumpulkan Flip Flop.", Duration = 2})
-        end)
-    end
-})
-
-TabFarm:CreateButton({
-    Name = "Auto Collect All Kunci",
-    Callback = function()
-        local parts = findParts(kwKey)
-        task.spawn(function()
-            for _, p in ipairs(parts) do
-                local r = getRoot()
-                if r then
-                    r.CFrame = p.CFrame + Vector3.new(0, 3, 0)
-                    task.wait(0.2)
-                    pcall(function()
-                        firetouchinterest(r, p, 0)
-                        firetouchinterest(r, p, 1)
-                    end)
-                    for _, d in ipairs(p:GetDescendants()) do
-                        if d:IsA("ProximityPrompt") then pcall(function() fireproximityprompt(d) end) end
+            staminaConn = RunService.Heartbeat:Connect(function()
+                local char = LP.Character
+                if char then
+                    for _, val in ipairs(char:GetDescendants()) do
+                        if val:IsA("NumberValue") or val:IsA("IntValue") then
+                            local n = val.Name:lower()
+                            if n:find("stamina") or n:find("energy") or n:find("fatigue") or n:find("sprint") then
+                                val.Value = 100
+                            end
+                        end
                     end
                 end
-                task.wait(0.15)
-            end
-            Rayfield:Notify({Title = "Farming", Content = "Selesai mengumpulkan Kunci.", Duration = 2})
-        end)
-    end
-})
-
--- TAB 4: TELEPORT
-TabTP:CreateSection("Location Teleport")
-
-TabTP:CreateButton({
-    Name = "Teleport ke Dapur",
-    Callback = function()
-        local parts = findParts({"dapur", "kitchen", "cook"})
-        if #parts > 0 then tpTo(parts[1].CFrame + Vector3.new(0, 3, 0)) end
-    end
-})
-
-TabTP:CreateButton({
-    Name = "Teleport ke Safe Zone",
-    Callback = function()
-        for _, obj in ipairs(Workspace:GetDescendants()) do
-            if obj:IsA("SpawnLocation") then tpTo(obj.CFrame + Vector3.new(0, 3, 0)) return end
+                local pGui = LP:FindFirstChild("PlayerGui")
+                if pGui then
+                    for _, val in ipairs(pGui:GetDescendants()) do
+                        if val:IsA("NumberValue") or val:IsA("IntValue") then
+                            local n = val.Name:lower()
+                            if n:find("stamina") or n:find("energy") or n:find("fatigue") then
+                                val.Value = 100
+                            end
+                        end
+                    end
+                end
+            end)
         end
     end
 })
 
-TabTP:CreateButton({
-    Name = "Teleport ke Opah",
-    Callback = function()
-        local _, hrp = findOpah()
-        if hrp then tpTo(hrp.CFrame * CFrame.new(0, 0, 5)) end
+local targetSpeed = 16
+local lockSpeed = false
+TabEx:CreateSlider({
+    Name = "WalkSpeed",
+    Range = {16, 75},
+    Increment = 1,
+    Suffix = " WS",
+    CurrentValue = 16,
+    Callback = function(val)
+        targetSpeed = val
+        if hum() then hum().WalkSpeed = val end
     end
 })
 
-TabTP:CreateButton({
-    Name = "Teleport ke Code",
-    Callback = function()
-        local parts = findParts(kwCode)
-        if #parts > 0 then tpTo(parts[1].CFrame + Vector3.new(0, 3, 0)) end
+TabEx:CreateToggle({
+    Name = "Lock WalkSpeed",
+    CurrentValue = false,
+    Callback = function(v)
+        lockSpeed = v
+        task.spawn(function()
+            while lockSpeed do
+                if hum() then hum().WalkSpeed = targetSpeed end
+                task.wait(0.2)
+            end
+        end)
     end
 })
 
-TabTP:CreateButton({
-    Name = "Teleport ke Pintu",
-    Callback = function()
-        local parts = findParts({"pintu", "door", "front", "entrance"})
-        if #parts > 0 then tpTo(parts[1].CFrame + Vector3.new(0, 0, 4)) end
+local noclipOn = false
+TabEx:CreateToggle({
+    Name = "Noclip",
+    CurrentValue = false,
+    Callback = function(v)
+        noclipOn = v
     end
 })
 
--- TAB 5: EKSKLUSIF
-TabEx:CreateSection("Eksklusif")
+RunService.Stepped:Connect(function()
+    if noclipOn and LP.Character then
+        for _, part in ipairs(LP.Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
 
-local warnActive = false
+TabEx:CreateSection("Opah Protection & Anti-Jumpscare")
+
 local warnConn
 TabEx:CreateToggle({
-    Name = "Indicator Warn",
+    Name = "Proximity Warn (Deteksi Jarak Opah)",
     CurrentValue = false,
     Callback = function(v)
-        warnActive = v
         if warnConn then warnConn:Disconnect() warnConn = nil end
         if v then
-            warnConn = RunService.RenderStepped:Connect(function()
+            local lastWarn = 0
+            warnConn = RunService.Heartbeat:Connect(function()
                 local r = getRoot()
                 local _, ohrp = findOpah()
-                if not r or not ohrp then return end
-                local dist = (r.Position - ohrp.Position).Magnitude
-                if dist < 25 then
-                    Rayfield:Notify({Title = "WARNING", Content = "Opah sangat dekat! Jarak: " .. math.floor(dist) .. " meter", Duration = 0.5})
-                end
-            end)
-        end
-    end
-})
-
-local autoRunActive = false
-local autoRunConn
-TabEx:CreateToggle({
-    Name = "Auto Run",
-    CurrentValue = false,
-    Callback = function(v)
-        autoRunActive = v
-        if autoRunConn then autoRunConn:Disconnect() autoRunConn = nil end
-        if v then
-            autoRunConn = RunService.Heartbeat:Connect(function()
-                local r = getRoot()
-                local _, ohrp = findOpah()
-                if not r or not ohrp then return end
-                if (r.Position - ohrp.Position).Magnitude < 18 then
-                    for _, obj in ipairs(Workspace:GetDescendants()) do
-                        if obj:IsA("SpawnLocation") then r.CFrame = obj.CFrame + Vector3.new(0, 3, 0) return end
+                if r and ohrp then
+                    local dist = (r.Position - ohrp.Position).Magnitude
+                    if dist < 25 and (tick() - lastWarn) > 2 then
+                        lastWarn = tick()
+                        Rayfield:Notify({Title = "PERINGATAN", Content = "Opah mendekat! Jarak: " .. math.floor(dist) .. " studs", Duration = 1.5})
                     end
                 end
             end)
@@ -365,12 +548,33 @@ TabEx:CreateToggle({
     end
 })
 
-local invisActive = false
+local autoDodgeConn
 TabEx:CreateToggle({
-    Name = "Invisible",
+    Name = "Anti-Jumpscare / Auto Evade Opah",
     CurrentValue = false,
     Callback = function(v)
-        invisActive = v
+        if autoDodgeConn then autoDodgeConn:Disconnect() autoDodgeConn = nil end
+        if v then
+            autoDodgeConn = RunService.Heartbeat:Connect(function()
+                local r = getRoot()
+                local _, ohrp = findOpah()
+                if r and ohrp and (r.Position - ohrp.Position).Magnitude < 16 then
+                    for _, obj in ipairs(Workspace:GetDescendants()) do
+                        if obj:IsA("SpawnLocation") then
+                            r.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
+                            return
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+TabEx:CreateToggle({
+    Name = "Invisible (Client Transparency)",
+    CurrentValue = false,
+    Callback = function(v)
         local char = LP.Character
         if not char then return end
         for _, part in ipairs(char:GetDescendants()) do
@@ -381,73 +585,43 @@ TabEx:CreateToggle({
     end
 })
 
-local autoDriveActive = false
-local driveConn
-TabEx:CreateToggle({
-    Name = "Auto Drive",
+-- ==========================================
+-- TAB 6: UTILITY & MUSIC
+-- ==========================================
+TabUtil:CreateSection("Interaction & Anti-AFK")
+
+local instantInteractOn = false
+TabUtil:CreateToggle({
+    Name = "Instant Interact (No Hold)",
     CurrentValue = false,
     Callback = function(v)
-        autoDriveActive = v
-        if driveConn then driveConn:Disconnect() driveConn = nil end
-        if not v then return end
-        driveConn = RunService.Heartbeat:Connect(function()
-            local char = LP.Character
-            if not char then return end
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if humanoid and humanoid.SeatPart == nil then
-                for _, obj in ipairs(Workspace:GetDescendants()) do
-                    if obj:IsA("VehicleSeat") then
-                        local r = getRoot()
-                        if r and (obj.Position - r.Position).Magnitude < 25 then
-                            r.CFrame = obj.CFrame + Vector3.new(0, 2, 0)
-                            task.wait(0.1)
-                            obj:Sit(humanoid)
-                        end
-                    end
+        instantInteractOn = v
+        task.spawn(function()
+            while instantInteractOn do
+                for _, p in ipairs(Workspace:GetDescendants()) do
+                    if p:IsA("ProximityPrompt") then p.HoldDuration = 0 end
                 end
+                task.wait(1)
             end
         end)
     end
 })
 
-local infStaminaActive = false
-local staminaConn
-TabEx:CreateToggle({
-    Name = "Infinity Stamina",
+local antiAfkConn
+TabUtil:CreateToggle({
+    Name = "Anti-AFK",
     CurrentValue = false,
     Callback = function(v)
-        infStaminaActive = v
-        if staminaConn then staminaConn:Disconnect() staminaConn = nil end
+        if antiAfkConn then antiAfkConn:Disconnect() antiAfkConn = nil end
         if v then
-            staminaConn = RunService.Heartbeat:Connect(function()
-                local char = LP.Character
-                if char then
-                    for _, v in ipairs(char:GetDescendants()) do
-                        if v:IsA("NumberValue") or v:IsA("ValueBase") then
-                            local name = v.Name:lower()
-                            if name:find("stamina") or name:find("energy") or name:find("fatigue") or name:find("tired") then
-                                v.Value = 100
-                            end
-                        end
-                    end
-                end
-                local pGui = LP:FindFirstChild("PlayerGui")
-                if pGui then
-                    for _, d in ipairs(pGui:GetDescendants()) do
-                        if d:IsA("NumberValue") or d:IsA("IntValue") then
-                            local name = d.Name:lower()
-                            if name:find("stamina") or name:find("energy") or name:find("fatigue") then
-                                d.Value = 100
-                            end
-                        end
-                    end
-                end
+            antiAfkConn = LP.Idled:Connect(function()
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
             end)
         end
     end
 })
 
--- TAB 6: UTILITY & MUSIC
 TabUtil:CreateSection("Music Player")
 
 local musicSound = Instance.new("Sound")
@@ -476,7 +650,7 @@ TabUtil:CreateButton({
     end
 })
 
-TabUtil:CreateSection("Server Utility")
+TabUtil:CreateSection("Server & Owner")
 
 TabUtil:CreateButton({
     Name = "Server Hop",
@@ -501,10 +675,10 @@ TabUtil:CreateButton({
 })
 
 TabUtil:CreateButton({
-    Name = "Copy Telegram Owner Link",
+    Name = "Copy Telegram Owner (t.me/ManzXDzx)",
     Callback = function()
         pcall(function() setclipboard("https://t.me/ManzXDzx") end)
-        Rayfield:Notify({Title = "Telegram", Content = "Link Telegram berhasil disalin.", Duration = 2})
+        Rayfield:Notify({Title = "Telegram", Content = "Link Telegram disalin.", Duration = 2})
     end
 })
 
