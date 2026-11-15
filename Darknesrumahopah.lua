@@ -1,360 +1,374 @@
-local Plrs = game:GetService("Players")
-local TS = game:GetService("TweenService")
-local UIS = game:GetService("UserInputService")
-local RS = game:GetService("RunService")
-local WS = game:GetService("Workspace")
-local Lgt = game:GetService("Lighting")
-local LP = Plrs.LocalPlayer
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
 local CoreGui = game:GetService("CoreGui")
+local LP = Players.LocalPlayer
 
--- Hapus UI lama jika ada
-if CoreGui:FindFirstChild("DarknesCustomHub") then
-    CoreGui.DarknesCustomHub:Destroy()
-end
-
--- ScreenGui Utama
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DarknesCustomHub"
-ScreenGui.Parent = CoreGui
-ScreenGui.ResetOnSpawn = false
-
--- 1. Floating Toggle Button (Logo D / Bisa Digeser)
-local FloatBtn = Instance.new("ImageButton")
-FloatBtn.Name = "FloatToggle"
-FloatBtn.Size = UDim2.new(0, 50, 0, 50)
-FloatBtn.Position = UDim2.new(0, 30, 0, 200)
-FloatBtn.BackgroundColor3 = Color3.fromRGB(15, 20, 35)
-FloatBtn.Image = "rbxassetid://0"
-FloatBtn.Active = true
-FloatBtn.Draggable = true
-FloatBtn.Parent = ScreenGui
-
-Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(0, 12)
-local FloatStroke = Instance.new("UIStroke", FloatBtn)
-FloatStroke.Color = Color3.fromRGB(0, 160, 255)
-FloatStroke.Transparency = 0.2
-FloatStroke.Thickness = 2
-
-local FloatText = Instance.new("TextLabel")
-FloatText.Size = UDim2.new(1, 0, 1, 0)
-FloatText.BackgroundTransparency = 1
-FloatText.TextColor3 = Color3.fromRGB(0, 180, 255)
-FloatText.TextSize = 20
-FloatText.Font = Enum.Font.GothamBold
-FloatText.Text = "D"
-FloatText.Parent = FloatBtn
-
--- 2. Kotak Besar Utama (Layout ala Vexus: Sidebar Kiri, Konten Kanan)
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainWindow"
-MainFrame.Size = UDim2.new(0, 0, 0, 0)
-MainFrame.Position = UDim2.new(0.5, -280, 0.5, -180)
-MainFrame.BackgroundColor3 = Color3.fromRGB(12, 14, 22)
-MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true
-MainFrame.Parent = ScreenGui
-
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
-local MainStroke = Instance.new("UIStroke", MainFrame)
-MainStroke.Color = Color3.fromRGB(0, 140, 255)
-MainStroke.Thickness = 1.5
-MainStroke.Transparency = 0.4
-
-local UIGradient = Instance.new("UIGradient", MainFrame)
-UIGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 45, 80)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 12, 18))
+local Window = Rayfield:CreateWindow({
+    Name = "DARKNES HUB | Rumah Opah",
+    LoadingTitle = "DARKNES HUB ULTIMATE",
+    LoadingSubtitle = "Rumah Opah Exclusive Edition",
+    Theme = "Default",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "DarknesHub",
+        FileName = "RumahOpahConfig"
+    },
+    KeySystem = false
 })
-UIGradient.Rotation = 90
 
--- Topbar
-local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 40)
-TopBar.BackgroundTransparency = 1
-TopBar.Parent = MainFrame
+local TabMain = Window:CreateTab("Item Teleport", 4483362458)
+local TabVisual = Window:CreateTab("Visual & ESP", 4483362458)
+local TabExcl = Window:CreateTab("Exclusive Features", 4483362458)
+local TabPlayer = Window:CreateTab("Player & Misc", 4483362458)
+local TabUtil = Window:CreateTab("Utility", 4483362458)
 
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(0, 380, 1, 0)
-TitleLabel.Position = UDim2.new(0, 15, 0, 0)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.TextColor3 = Color3.fromRGB(240, 245, 255)
-TitleLabel.TextSize = 14
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.Text = "DARKNES HUB | Rumah Opah"
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.Parent = TopBar
-
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 35, 0, 35)
-CloseBtn.Position = UDim2.new(1, -40, 0, 2.5)
-CloseBtn.BackgroundTransparency = 1
-CloseBtn.TextColor3 = Color3.fromRGB(255, 90, 90)
-CloseBtn.TextSize = 18
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.Text = "×"
-CloseBtn.Parent = TopBar
-CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-
-local MinBtn = Instance.new("TextButton")
-MinBtn.Size = UDim2.new(0, 35, 0, 35)
-MinBtn.Position = UDim2.new(1, -75, 0, 2.5)
-MinBtn.BackgroundTransparency = 1
-MinBtn.TextColor3 = Color3.fromRGB(180, 200, 220)
-MinBtn.TextSize = 18
-MinBtn.Font = Enum.Font.GothamBold
-MinBtn.Text = "-"
-MinBtn.Parent = TopBar
-
-local isOpen = true
-MinBtn.MouseButton1Click:Connect(function()
-    isOpen = not isOpen
-    local targetSize = isOpen and UDim2.new(0, 580, 0, 380) or UDim2.new(0, 580, 0, 40)
-    TS:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = targetSize}):Play()
-end)
-
-local menuVisible = true
-FloatBtn.MouseButton1Click:Connect(function()
-    menuVisible = not menuVisible
-    if menuVisible then
-        MainFrame.Visible = true
-        TS:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 580, 0, 380)}):Play()
-    else
-        local tw = TS:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
-        tw:Play()
-        tw.Completed:Connect(function() if not menuVisible then MainFrame.Visible = false end end)
-    end
-end)
-
--- Animasi Buka Pertama Kali
-MainFrame.Size = UDim2.new(0, 0, 0, 0)
-TS:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 580, 0, 380)}):Play()
-
--- Sidebar di Kiri
-local Sidebar = Instance.new("ScrollingFrame")
-Sidebar.Size = UDim2.new(0, 140, 1, -50)
-Sidebar.Position = UDim2.new(0, 10, 0, 45)
-Sidebar.BackgroundTransparency = 1
-Sidebar.CanvasSize = UDim2.new(0, 0, 1, 0)
-Sidebar.ScrollBarThickness = 2
-Sidebar.Parent = MainFrame
-
-local SideLayout = Instance.new("UIListLayout", Sidebar)
-SideLayout.SortOrder = Enum.SortOrder.LayoutOrder
-SideLayout.Padding = UDim.new(0, 6)
-
-local ContentContainer = Instance.new("Frame")
-ContentContainer.Size = UDim2.new(1, -165, 1, -50)
-ContentContainer.Position = UDim2.new(0, 155, 0, 45)
-ContentContainer.BackgroundTransparency = 1
-ContentContainer.Parent = MainFrame
-
-local firstTab = true
-local function CreateTab(name)
-    local tabBtn = Instance.new("TextButton")
-    tabBtn.Size = UDim2.new(1, 0, 0, 32)
-    tabBtn.BackgroundColor3 = Color3.fromRGB(20, 26, 42)
-    tabBtn.TextColor3 = Color3.fromRGB(180, 205, 235)
-    tabBtn.TextSize = 13
-    tabBtn.Font = Enum.Font.GothamMedium
-    tabBtn.Text = name
-    tabBtn.Parent = Sidebar
-    
-    Instance.new("UICorner", tabBtn).CornerRadius = UDim.new(0, 6)
-    
-    local tabContent = Instance.new("ScrollingFrame")
-    tabContent.Size = UDim2.new(1, 0, 1, 0)
-    tabContent.BackgroundTransparency = 1
-    tabContent.CanvasSize = UDim2.new(0, 0, 3, 0)
-    tabContent.ScrollBarThickness = 3
-    tabContent.Visible = firstTab
-    tabContent.Parent = ContentContainer
-    
-    local contentLayout = Instance.new("UIListLayout", tabContent)
-    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    contentLayout.Padding = UDim.new(0, 8)
-    
-    if firstTab then
-        tabBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-        tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        firstTab = false
-    end
-    
-    tabBtn.MouseButton1Click:Connect(function()
-        for _, child in ipairs(ContentContainer:GetChildren()) do
-            if child:IsA("ScrollingFrame") then child.Visible = false end
-        end
-        for _, btn in ipairs(Sidebar:GetChildren()) do
-            if btn:IsA("TextButton") then
-                btn.BackgroundColor3 = Color3.fromRGB(20, 26, 42)
-                btn.TextColor3 = Color3.fromRGB(180, 205, 235)
-            end
-        end
-        tabContent.Visible = true
-        tabBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-        tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    end)
-    
-    return tabContent
+local function getRoot()
+    local c = LP.Character
+    return c and c:FindFirstChild("HumanoidRootPart")
 end
 
-local function AddToggle(tab, text, callback)
-    local tBtn = Instance.new("TextButton")
-    tBtn.Size = UDim2.new(1, -5, 0, 35)
-    tBtn.BackgroundColor3 = Color3.fromRGB(18, 24, 38)
-    tBtn.TextColor3 = Color3.fromRGB(220, 230, 245)
-    tBtn.TextSize = 12
-    tBtn.Font = Enum.Font.GothamMedium
-    tBtn.Text = text .. ": [ OFF ]"
-    tBtn.TextXAlignment = Enum.TextXAlignment.Left
-    tBtn.Parent = tab
-    
-    local pad = Instance.new("UIPadding", tBtn)
-    pad.PaddingLeft = UDim.new(0, 10)
-    
-    Instance.new("UICorner", tBtn).CornerRadius = UDim.new(0, 6)
-    
-    local state = false
-    tBtn.MouseButton1Click:Connect(function()
-        state = not state
-        tBtn.Text = text .. ": [ " .. (state and "ON" .. " ]" or "OFF" .. " ]")
-        tBtn.TextColor3 = state and Color3.fromRGB(0, 200, 255) or Color3.fromRGB(220, 230, 245)
-        callback(state)
-    end)
-end
-
-local function AddButton(tab, text, callback)
-    local bBtn = Instance.new("TextButton")
-    bBtn.Size = UDim2.new(1, -5, 0, 35)
-    bBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-    bBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    bBtn.TextSize = 12
-    bBtn.Font = Enum.Font.GothamBold
-    bBtn.Text = text
-    bBtn.Parent = tab
-    
-    Instance.new("UICorner", bBtn).CornerRadius = UDim.new(0, 6)
-    bBtn.MouseButton1Click:Connect(callback)
-end
-
--- Floating Ping & FPS Widget
-local pingGui = Instance.new("ScreenGui")
-pingGui.Name = "DarknesPingGui"
-pingGui.Parent = CoreGui
-pingGui.Enabled = true
-
-local pingFrame = Instance.new("Frame")
-pingFrame.Size = UDim2.new(0, 160, 0, 35)
-pingFrame.Position = UDim2.new(0, 50, 0, 50)
-pingFrame.BackgroundColor3 = Color3.fromRGB(15, 20, 35)
-pingFrame.BorderSizePixel = 0
-pingFrame.Active = true
-pingFrame.Draggable = true
-pingFrame.Parent = pingGui
-
-Instance.new("UICorner", pingFrame).CornerRadius = UDim.new(0, 6)
-local pStroke = Instance.new("UIStroke", pingFrame)
-pStroke.Color = Color3.fromRGB(0, 150, 255)
-pStroke.Thickness = 1.5
-
-local pingLabel = Instance.new("TextLabel")
-pingLabel.Size = UDim2.new(1, 0, 1, 0)
-pingLabel.BackgroundTransparency = 1
-pingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-pingLabel.TextSize = 13
-pingLabel.Font = Enum.Font.Code
-pingLabel.Text = "Ping: ...ms | FPS: ..."
-pingLabel.Parent = pingFrame
-
-local statsConn = RS.RenderStepped:Connect(function()
-    local pVal = math.floor(LP:GetNetworkPing() * 1000 + 0.5)
-    local fVal = math.floor(1 / RS.RenderStepped:Wait())
-    pingLabel.Text = string.format("Ping: %dms | FPS: %d", pVal, fVal)
-end)
-
--- Tabs
-local tMain = CreateTab("Main Items")
-local tVisual = CreateTab("Visual")
-local tUtil = CreateTab("Utility")
-
-local function root() return LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") end
-local function match(str, list)
+local function matchName(str, list)
     if not str then return false end
-    local low = str:lower()
+    local low = string.lower(str)
     for _, k in ipairs(list) do
-        if low:find(k) then return true end
+        if low:find(k, 1, true) then return true end
     end
     return false
 end
 
--- Keywords untuk Rumah Opah
 local kwKey = {"key", "kunci"}
-local kwFlipFlop = {"flip", "flop", "sandal", "shoe", "slippers"}
-local kwCode = {"code", "password", "sandi", "pin"}
+local kwFlip = {"flip", "flop", "sandal", "shoe", "slippers", "sendal"}
+local kwCode = {"code", "password", "sandi", "pin", "kode"}
+local kwOpah = {"opah", "granny", "nenek", "npc", "monster"}
+local kwMotor = {"motor", "bike", "motorcycle", "scooter", "vehicle", "seat"}
 
--- Fungsi Bring Items (Teleport item ke Player)
-local function bringItems(keywords)
-    local r = root()
-    if not r then return end
-    for _, obj in ipairs(WS:GetDescendants()) do
+local function findParts(keywords)
+    local found = {}
+    for _, obj in ipairs(Workspace:GetDescendants()) do
         if obj:IsA("BasePart") or obj:IsA("Model") then
-            if match(obj.Name, keywords) then
-                local part = obj:IsA("Model") and (obj:PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
+            if matchName(obj.Name, keywords) then
+                local part = obj
+                if obj:IsA("Model") then
+                    part = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                end
                 if part and part:IsA("BasePart") then
-                    part.CFrame = r.CFrame + Vector3.new(0, 2, 0)
+                    table.insert(found, part)
                 end
             end
         end
     end
+    return found
 end
 
--- Main Items Tab
-AddButton(tMain, "Bring All Keys", function()
-    bringItems(kwKey)
-end)
-
-AddButton(tMain, "Bring All Flip Flops", function()
-    bringItems(kwFlipFlop)
-end)
-
-AddButton(tMain, "Bring Code", function()
-    bringItems(kwCode)
-end)
-
--- Visual Tab
-AddToggle(tVisual, "Fullbright", function(v)
-    Lgt.Brightness = v and 3 or 1
-    Lgt.GlobalShadows = not v
-end)
-
-AddToggle(tVisual, "Ping Widget On/Off", function(v)
-    pingGui.Enabled = v
-end)
-
--- Utility Tab
-AddToggle(tUtil, "Instant Interact", function(v)
-    task.spawn(function()
-        while v do
-            for _, p in ipairs(WS:GetDescendants()) do
-                if p:IsA("ProximityPrompt") then p.HoldDuration = 0 end
-            end
-            task.wait(1)
+local function findOpah()
+    for _, m in ipairs(Workspace:GetDescendants()) do
+        if m:IsA("Model") and matchName(m.Name, kwOpah) then
+            local hrp = m:FindFirstChild("HumanoidRootPart") or m:FindFirstChildWhichIsA("BasePart")
+            if hrp then return m, hrp end
         end
-    end)
+    end
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LP and matchName(p.Name, kwOpah) then
+            local c = p.Character
+            if c then
+                local hrp = c:FindFirstChild("HumanoidRootPart")
+                if hrp then return c, hrp end
+            end
+        end
+    end
+    return nil, nil
+end
+
+local function bringItems(keywords)
+    local r = getRoot()
+    if not r then return end
+    local count = 0
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if (obj:IsA("BasePart") or obj:IsA("Model") or obj:IsA("Tool")) and not Players:GetPlayerFromCharacter(obj) then
+            if matchName(obj.Name, keywords) then
+                local part = nil
+                if obj:IsA("Tool") then
+                    part = obj:FindFirstChild("Handle") or obj:FindFirstChildWhichIsA("BasePart")
+                elseif obj:IsA("Model") then
+                    part = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                elseif obj:IsA("BasePart") then
+                    part = obj
+                end
+                if part then
+                    part.CFrame = r.CFrame * CFrame.new(0, 2, -2)
+                    count = count + 1
+                end
+            end
+        end
+    end
+    Rayfield:Notify({
+        Title = "Bring Items",
+        Content = "Berhasil menarik " .. tostring(count) .. " item ke posisi anda.",
+        Duration = 2
+    })
+end
+
+-- TAB 1: ITEM TELEPORT / BRING
+TabMain:CreateSection("Objective Items")
+
+TabMain:CreateButton({
+    Name = "Bring All Keys",
+    Callback = function()
+        bringItems(kwKey)
+    end
+})
+
+TabMain:CreateButton({
+    Name = "Bring All Flip Flops",
+    Callback = function()
+        bringItems(kwFlip)
+    end
+})
+
+TabMain:CreateButton({
+    Name = "Bring Code / Note",
+    Callback = function()
+        bringItems(kwCode)
+    end
+})
+
+TabMain:CreateSection("Teleport Lokasi Penting")
+
+TabMain:CreateButton({
+    Name = "Teleport ke Dapur",
+    Callback = function()
+        local parts = findParts({"dapur", "kitchen", "cook"})
+        if #parts > 0 then
+            local r = getRoot()
+            if r then r.CFrame = parts[1].CFrame + Vector3.new(0, 3, 0) end
+        end
+    end
+})
+
+TabMain:CreateButton({
+    Name = "Teleport ke Safe Zone",
+    Callback = function()
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("SpawnLocation") then
+                local r = getRoot()
+                if r then r.CFrame = obj.CFrame + Vector3.new(0, 3, 0) return end
+            end
+        end
+    end
+})
+
+TabMain:CreateButton({
+    Name = "Teleport ke Opah",
+    Callback = function()
+        local _, hrp = findOpah()
+        local r = getRoot()
+        if hrp and r then
+            r.CFrame = hrp.CFrame * CFrame.new(0, 0, 4)
+        end
+    end
+})
+
+-- TAB 2: VISUAL & ESP
+local espFolder = Instance.new("Folder")
+espFolder.Name = "DarknesRayfieldESP"
+espFolder.Parent = CoreGui
+
+local function clearHighlights()
+    for _, obj in ipairs(CoreGui:GetDescendants()) do
+        if obj.Name == "DarknesESP_HL" then obj:Destroy() end
+    end
+end
+
+TabVisual:CreateSection("ESP Settings")
+
+TabVisual:CreateToggle({
+    Name = "ESP Opah / Monster",
+    CurrentValue = false,
+    Callback = function(v)
+        if v then
+            task.spawn(function()
+                while v do
+                    local model, hrp = findOpah()
+                    if model and not model:FindFirstChild("DarknesESP_HL") then
+                        local h = Instance.new("Highlight", model)
+                        h.Name = "DarknesESP_HL"
+                        h.FillColor = Color3.fromRGB(255, 40, 40)
+                    end
+                    task.wait(2)
+                end
+            end)
+        else
+            clearHighlights()
+        end
+    end
+})
+
+TabVisual:CreateToggle({
+    Name = "ESP Important Items (Keys/Code/Sandal)",
+    CurrentValue = false,
+    Callback = function(v)
+        if v then
+            for _, obj in ipairs(Workspace:GetDescendants()) do
+                if (obj:IsA("BasePart") or obj:IsA("Model")) and matchName(obj.Name, {"key", "kunci", "flip", "flop", "sandal", "code", "kode"}) then
+                    local target = obj:IsA("Model") and (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")) or obj
+                    if target and not target:FindFirstChild("DarknesESP_HL") then
+                        local h = Instance.new("Highlight", target)
+                        h.Name = "DarknesESP_HL"
+                        h.FillColor = Color3.fromRGB(0, 170, 255)
+                    end
+                end
+            end
+        else
+            clearHighlights()
+        end
+    end
+})
+
+TabVisual:CreateSection("Environment")
+
+local origBrightness = Lighting.Brightness
+local origShadows = Lighting.GlobalShadows
+
+TabVisual:CreateToggle({
+    Name = "Fullbright",
+    CurrentValue = false,
+    Callback = function(v)
+        if v then
+            Lighting.Brightness = 3
+            Lighting.GlobalShadows = false
+            Lighting.ClockTime = 14
+        else
+            Lighting.Brightness = origBrightness
+            Lighting.GlobalShadows = origShadows
+        end
+    end
+})
+
+-- TAB 3: EXCLUSIVE FEATURES
+TabExcl:CreateSection("Opah & Player Actions")
+
+TabExcl:CreateButton({
+    Name = "Bring Opah to Me",
+    Callback = function()
+        local r = getRoot()
+        local _, hrp = findOpah()
+        if r and hrp and not hrp.Anchored then
+            hrp.CFrame = r.CFrame * CFrame.new(0, 0, -5)
+        end
+    end
+})
+
+local godModeActive = false
+TabExcl:CreateToggle({
+    Name = "Godmode / Anti-Damage Bypass",
+    CurrentValue = false,
+    Callback = function(v)
+        godModeActive = v
+        task.spawn(function()
+            while godModeActive do
+                if LP.Character and LP.Character:FindFirstChild("Humanoid") then
+                    LP.Character.Humanoid.Health = LP.Character.Humanoid.MaxHealth
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+})
+
+-- TAB 4: PLAYER & MISC
+local noclipActive = false
+local targetWalkSpeed = 16
+
+TabPlayer:CreateSection("Movement")
+
+TabPlayer:CreateSlider({
+    Name = "WalkSpeed",
+    Range = {16, 80},
+    Increment = 1,
+    Suffix = " Speed",
+    CurrentValue = 16,
+    Callback = function(val)
+        targetWalkSpeed = val
+        if LP.Character and LP.Character:FindFirstChild("Humanoid") then
+            LP.Character.Humanoid.WalkSpeed = val
+        end
+    end
+})
+
+TabPlayer:CreateToggle({
+    Name = "Noclip",
+    CurrentValue = false,
+    Callback = function(v)
+        noclipActive = v
+    end
+})
+
+RunService.Stepped:Connect(function()
+    if noclipActive and LP.Character then
+        for _, part in ipairs(LP.Character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    end
 end)
 
-local unBtn = Instance.new("TextButton")
-unBtn.Size = UDim2.new(1, -5, 0, 35)
-unBtn.BackgroundColor3 = Color3.fromRGB(45, 15, 15)
-unBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-unBtn.TextSize = 13
-unBtn.Font = Enum.Font.GothamBold
-unBtn.Text = "Unload Hub"
-unBtn.Parent = tUtil
-Instance.new("UICorner", unBtn).CornerRadius = UDim.new(0, 6)
-unBtn.MouseButton1Click:Connect(function()
-    if pingGui then pingGui:Destroy() end
-    if statsConn then statsConn:Disconnect() end
-    ScreenGui:Destroy()
-end)
+TabPlayer:CreateSection("Interaction")
 
-print("DARKNES HUB | Rumah Opah Loaded Successfully!")
+TabPlayer:CreateToggle({
+    Name = "Instant Interact (No Hold)",
+    CurrentValue = false,
+    Callback = function(v)
+        task.spawn(function()
+            while v do
+                for _, prompt in ipairs(Workspace:GetDescendants()) do
+                    if prompt:IsA("ProximityPrompt") then
+                        prompt.HoldDuration = 0
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+-- TAB 5: UTILITY
+TabUtil:CreateSection("Server & Community")
+
+TabUtil:CreateButton({
+    Name = "Server Hop",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local HttpService = game:GetService("HttpService")
+        local placeId = game.PlaceId
+        local ok, servers = pcall(function()
+            local req = game:HttpGet("https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100")
+            return HttpService:JSONDecode(req)
+        end)
+        if ok and servers and servers.data then
+            for _, s in ipairs(servers.data) do
+                if s.playing < s.maxPlayers and s.id ~= game.JobId then
+                    TeleportService:TeleportToPlaceInstance(placeId, s.id, LP)
+                    return
+                end
+            end
+        end
+        TeleportService:Teleport(placeId, LP)
+    end
+})
+
+TabUtil:CreateButton({
+    Name = "Copy Telegram Owner Link",
+    Callback = function()
+        pcall(function()
+            setclipboard("https://t.me/ManzXDzx")
+        end)
+        Rayfield:Notify({Title = "Utility", Content = "Link Telegram berhasil disalin.", Duration = 2})
+    end
+})
+
+Rayfield:LoadConfiguration()
